@@ -37,7 +37,7 @@
 
 /* Demo declarations. */
 extern void vStartMQTTEnduranceDemo( void );
-/* extern void vStartMQTTEchoDemo( void );
+/* extern void vStartMQTTEchoDemo( void ); */
 /* extern void vStartSubpubDemoTasks( void ); */
 /* extern void vStartSimpleTCPServerTasks( void ); */
 /* extern void vStartTCPEchoClientTasks_SingleTasks( void ); */

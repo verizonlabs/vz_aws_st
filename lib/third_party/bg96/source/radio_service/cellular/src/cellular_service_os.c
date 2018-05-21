@@ -238,7 +238,7 @@ bool osCDS_cellular_service_init(void)
     if (CellularServiceMutexHandle == NULL)
     {
       result = false;
-     // ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 1, ERROR_FATAL);
+      ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 1, ERROR_FATAL);
     }
     else
     {
