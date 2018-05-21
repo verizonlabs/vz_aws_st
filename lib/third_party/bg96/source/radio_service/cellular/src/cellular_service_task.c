@@ -1285,7 +1285,7 @@ static void CST_reset_state(CST_autom_event_t autom_event)
         }
         default:
         {
-          // ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 7, ERROR_WARNING);
+           ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 7, ERROR_WARNING);
            break;
         }
     }
@@ -1328,7 +1328,7 @@ static void CST_modem_powered_on_state(CST_autom_event_t autom_event)
         }
         default:
         {
-          // ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 9, ERROR_WARNING);
+           ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 9, ERROR_WARNING);
            break;
         }
     }
@@ -1347,7 +1347,7 @@ static void CST_waiting_for_signal_quality_ok_state(CST_autom_event_t autom_even
         }
         default:
         {
-          // ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 9, ERROR_WARNING);
+           ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 9, ERROR_WARNING);
            break;
         }
     }
@@ -1384,7 +1384,7 @@ static void CST_waiting_for_network_status_state(CST_autom_event_t autom_event)
         }      
         default:
         {
-          // ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 9, ERROR_WARNING);
+           ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 9, ERROR_WARNING);
            break;
         }
     }
@@ -1528,7 +1528,7 @@ static void CST_fail_state(CST_autom_event_t autom_event)
     {
         case CST_FAIL_EVENT:
         {
-          // ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 25, ERROR_WARNING);
+           ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 25, ERROR_WARNING);
            break;
         }
         default:
@@ -1807,7 +1807,7 @@ CS_Status_t CST_cellular_service_init(void)
     cst_queue_id = osMessageCreate(osMessageQ(cst_queue_id), NULL);
     if(cst_queue_id == NULL)
     {
-     // ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 18, ERROR_FATAL);
+      ERROR_Handler(DBG_CHAN_CELLULAR_SERVICE, 18, ERROR_FATAL);
     }
     return CELLULAR_OK;
 }

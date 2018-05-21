@@ -143,7 +143,7 @@ at_status_t  AT_init(void)
     /* should be called once */
     if (AT_Core_initialized == 1)
     {
-       // LogError(1, ERROR_WARNING);
+        LogError(1, ERROR_WARNING);
         return (ATSTATUS_ERROR);
     }
 
@@ -220,7 +220,7 @@ at_handle_t  AT_open(sysctrl_info_t *p_device_infos, event_callback_t event_call
     /* Initialize parser for required device type */
     if (ATParser_initParsers(p_device_infos->type) != ATSTATUS_OK)
     {
-        //LogError(21, ERROR_FATAL);
+        LogError(21, ERROR_FATAL);
         return (ATSTATUS_ERROR);
     }
 
@@ -257,7 +257,7 @@ at_handle_t  AT_open(sysctrl_info_t *p_device_infos, event_callback_t event_call
     if(at_context[affectedHandle].s_SendConfirm_SemaphoreId == NULL)
     {
         PrintErr("SendSemaphoreId creation error for handle = %d", affectedHandle);
-       // LogError(2, ERROR_WARNING);
+        LogError(2, ERROR_WARNING);
         return (ATSTATUS_ERROR);
     }
     /* init semaphore */
@@ -341,7 +341,7 @@ at_status_t AT_sendcmd(at_handle_t athandle, at_msg_t msg_in_id, at_buf_t *p_cmd
     {
         PrintErr("!!!!!!!!!!!!!!!!!! WARNING COMMAND IS UNDER PROCESS !!!!!!!!!!!!!!!!!!");
         retval = ATSTATUS_ERROR;
-       // LogError(3, ERROR_WARNING);
+        LogError(3, ERROR_WARNING);
         goto exit_func;
     }
 
@@ -371,7 +371,7 @@ at_status_t AT_sendcmd(at_handle_t athandle, at_msg_t msg_in_id, at_buf_t *p_cmd
     else if (msg_in_id == SID_CS_DATA_SUSPEND)
     {
         retval = ATSTATUS_ERROR;
-       // LogError(3, ERROR_WARNING);
+        LogError(3, ERROR_WARNING);
         PrintErr("DATA not active");
         goto exit_func;
     }
@@ -536,7 +536,7 @@ static at_status_t allocate_ATHandle(uint16_t *athandle)
 
     if (idx == ATCORE_MAX_HANDLES)
     {
-        //LogError(6, ERROR_FATAL); AVK
+        LogError(6, ERROR_FATAL);
         retval = ATSTATUS_ERROR;
     }
     *athandle = idx;
@@ -605,7 +605,7 @@ static at_status_t process_AT_transaction(at_handle_t athandle, at_msg_t msg_in_
         if (action_send & ATACTION_SEND_ERROR)
         {
             PrintErr("AT_sendcmd error: get at command");
-            //LogError(7, ERROR_WARNING);
+            LogError(7, ERROR_WARNING);
             return(ATSTATUS_ERROR);
         }
 
@@ -619,7 +619,7 @@ static at_status_t process_AT_transaction(at_handle_t athandle, at_msg_t msg_in_
             {
                 /* impossible to send a CMD during data mode */
                 PrintErr("DATA ongoing, can not send a command");
-                //LogError(8, ERROR_WARNING);
+                LogError(8, ERROR_WARNING);
                 return(ATSTATUS_ERROR);
             }
 
@@ -627,7 +627,7 @@ static at_status_t process_AT_transaction(at_handle_t athandle, at_msg_t msg_in_
             if (retval != ATSTATUS_OK)
             {
                 PrintErr("AT_sendcmd error: send to ipc");
-                //LogError(9, ERROR_WARNING);
+                LogError(9, ERROR_WARNING);
                 return(ATSTATUS_ERROR);
             }
         }
@@ -659,7 +659,7 @@ static at_status_t process_AT_transaction(at_handle_t athandle, at_msg_t msg_in_
                                  count_disable,
                                  count_enable);
 #endif /* DBG_REQUEST_DURATION */
-                      //  LogError(10, ERROR_WARNING);
+                        LogError(10, ERROR_WARNING);
                         return(ATSTATUS_ERROR);
                     }
                     else /* ATACTION_SEND_TEMPO */
@@ -701,7 +701,7 @@ static at_status_t process_AT_transaction(at_handle_t athandle, at_msg_t msg_in_
                     /* clean flag */
                     at_context[athandle].action_flags &= ~((at_action_rsp_t) ATACTION_RSP_ERROR);
                     PrintErr("AT_sendcmd error: parse from rsp");
-                   // LogError(11, ERROR_WARNING);
+                    LogError(11, ERROR_WARNING);
                     return(ATSTATUS_ERROR);
                 }
                 else
@@ -775,7 +775,7 @@ static at_status_t process_AT_transaction(at_handle_t athandle, at_msg_t msg_in_
         else
         {
             PrintErr("Invalid action code");
-           // LogError(13, ERROR_WARNING);
+            LogError(13, ERROR_WARNING);
             return(ATSTATUS_ERROR);
         }
 
@@ -789,7 +789,7 @@ static at_status_t process_AT_transaction(at_handle_t athandle, at_msg_t msg_in_
     PrintDBG("action_rsp value = %d", action_rsp);
     if (action_rsp == ATACTION_RSP_ERROR)
     {
-       // LogError(14, ERROR_WARNING);
+        LogError(14, ERROR_WARNING);
         return (ATSTATUS_ERROR);
     }
 
@@ -806,7 +806,7 @@ static at_status_t sendToIPC(at_handle_t athandle,
     if (IPC_send(&ipcHandleTab[athandle], cmdBuf, cmdSize) == IPC_ERROR)
     {
         PrintErr(" IPC send error");
-       // LogError(15, ERROR_WARNING);
+        LogError(15, ERROR_WARNING);
         return (ATSTATUS_ERROR);
     }
 
@@ -932,7 +932,7 @@ at_status_t atcore_task_start(osPriority taskPrio, uint32_t stackSize)
     if (AT_Core_initialized != 1)
     {
         PrintErr("error, ATCore is not initialized");
-      //  LogError(17, ERROR_WARNING);
+        LogError(17, ERROR_WARNING);
         return (ATSTATUS_ERROR);
     }
 
@@ -942,7 +942,7 @@ at_status_t atcore_task_start(osPriority taskPrio, uint32_t stackSize)
   if(s_WaitAnswer_SemaphoreId == NULL)
   {
     PrintErr("s_WaitAnswer_SemaphoreId creation error");
-   // LogError(18, ERROR_WARNING);
+    LogError(18, ERROR_WARNING);
     return (ATSTATUS_ERROR);
   }
   /* init semaphore */
@@ -958,7 +958,7 @@ at_status_t atcore_task_start(osPriority taskPrio, uint32_t stackSize)
   if(atcoreTaskId == NULL)
   {
     PrintErr("atcoreTaskId creation error");
-    //LogError(19, ERROR_WARNING);
+    LogError(19, ERROR_WARNING);
     return (ATSTATUS_ERROR);
   }
   else
@@ -981,7 +981,7 @@ static at_status_t findMsgReceivedHandle(at_handle_t* athandle)
             return ATSTATUS_OK;
         }
     }
-  //  LogError(20, ERROR_WARNING);
+    LogError(20, ERROR_WARNING);
     return ATSTATUS_ERROR;
 }
 
