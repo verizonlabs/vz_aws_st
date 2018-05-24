@@ -51,7 +51,7 @@
 #include "ipc_common.h"
 #include "plf_config.h"
 
-#if (USE_TRACE_IPC == 1)
+#if (USE_TRACE_INTERFACE_IPC == 1)
 #include "trace_interface.h"
 #define PrintINFO(format, args...) TracePrint(DBG_CHAN_IPC, DBL_LVL_P0, "IPC:" format "\n\r", ## args)
 #define PrintDBG(format, args...)  TracePrint(DBG_CHAN_IPC, DBL_LVL_P1, "IPC:" format "\n\r", ## args)
