@@ -1,35 +1,55 @@
 /**
   ******************************************************************************
   * @file    Middlewares\ST\core\ipc\src\ipc_uart.c
-  * @author  MCD Application Team
+  * @author  MCD Marketing / Vertical Application Team
   * @version V0.4
   * @date    29-June-2017
   * @brief   This file provides code for uart IPC
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2018 STMicroelectronics</center></h2>
+  * <h2><center>&copy; Copyright © 2017 STMicroelectronics International N.V.
+  * All rights reserved.</center></h2>
   *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
+  * Redistribution and use in source and binary forms, with or without
+  * modification, are permitted, provided that the following conditions are met:
   *
-  *        http://www.st.com/software_license_agreement_liberty_v2
+  * 1. Redistribution of source code must retain the above copyright notice,
+  *    this list of conditions and the following disclaimer.
+  * 2. Redistributions in binary form must reproduce the above copyright notice,
+  *    this list of conditions and the following disclaimer in the documentation
+  *    and/or other materials provided with the distribution.
+  * 3. Neither the name of STMicroelectronics nor the names of other
+  *    contributors to this software may be used to endorse or promote products
+  *    derived from this software without specific written permission.
+  * 4. This software, including modifications and/or derivative works of this
+  *    software, must execute solely and exclusively on microcontroller or
+  *    microprocessor devices manufactured by or for STMicroelectronics.
+  * 5. Redistribution and use of this software other than as permitted under
+  *    this license is void and will automatically terminate your rights under
+  *    this license.
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
+  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
+  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
+  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
+  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
+  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */ 
+  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "plf_config.h"
-#include "ipc_rxfifo.h"
-#include "ipc_uart.h"
 #include "string.h"
+#include "ipc_uart.h"
+#include "ipc_rxfifo.h"
+#include "plf_config.h"
 
 #if (RTOS_USED == 1)
 #define mySemaphoreDef(name,index)  \
@@ -40,17 +60,17 @@ const osSemaphoreDef_t os_semaphore_def_##name##index = { 0 }
 
 #if (USE_TRACE_INTERFACE_IPC == 1)
 #include "trace_interface.h"
-#define PrintINFO(format, args...) TracePrint(DBG_CHAN_IPC, DBL_LVL_P0, "IPC:" format "\r\n", ## args)
-#define PrintDBG(format, args...)  TracePrint(DBG_CHAN_IPC, DBL_LVL_P1, "IPC:" format "\r\n", ## args)
-#define PrintErr(format, args...)  TracePrint(DBG_CHAN_IPC, DBL_LVL_ERR, "IPC ERROR:" format "\r\n", ## args)
+#define PrintINFO(format, args...) TracePrint(DBG_CHAN_IPC, DBL_LVL_P0, "IPC:" format "\n\r", ## args)
+#define PrintDBG(format, args...)  TracePrint(DBG_CHAN_IPC, DBL_LVL_P1, "IPC:" format "\n\r", ## args)
+#define PrintErr(format, args...)  TracePrint(DBG_CHAN_IPC, DBL_LVL_ERR, "IPC ERROR:" format "\n\r", ## args)
 #elif (USE_PRINTF == 1)
 #define PrintINFO(format, args...)  printf("IPC:" format "\r\n", ## args)
 #define PrintDBG(format, args...)   printf("IPC:" format "\r\n", ## args)
 #define PrintErr(format, args...)   printf("IPC ERROR:" format "\r\n", ## args)
 #elif (USE_CONFIGPRINTF_IPC == 1)
-#define PrintINFO(format, args...)  printf("IPC:" format "\r\n", ## args)
-#define PrintDBG(format, args...)   printf("IPC:" format "\r\n", ## args)
-#define PrintErr(format, args...)   printf("IPC ERROR:" format "\r\n", ## args)
+#define PrintINFO(format, args...)  vLoggingPrintf("IPC:" format "\r\n", ## args)
+#define PrintDBG(format, args...)   vLoggingPrintf("IPC:" format "\r\n", ## args)
+#define PrintErr(format, args...)   vLoggingPrintf("IPC ERROR:" format "\r\n", ## args)
 #else
 #define PrintINFO(format, args...)  do {} while(0)
 #define PrintDBG(format, args...)   do {} while(0)
@@ -194,6 +214,7 @@ IPC_Status_t IPC_open_uart(IPC_Handle_t *hipc,
     hipc->TxClientCallback = pTxClientCallback;
     hipc->CheckEndOfMsgCallback = pCheckEndOfMsg;
     hipc->Mode = mode;
+    hipc->UartBusyFlag = 0U;
 
     /* init RXFIFO */
     RXFIFO_init(hipc);
@@ -377,22 +398,6 @@ IPC_Status_t IPC_send_uart(IPC_Handle_t *hipc, uint8_t* p_TxBuffer, uint16_t buf
     }
 #endif /* RTOS_USED */
 
-#if defined(IPC_UART_CHAR_BY_CHAR)
-    /* send string char by char (without IT) */
-    uint32_t cpt;
-    for (cpt=0; cpt<(bufsize - 1); cpt++)
-    {
-        if(HAL_UART_Transmit(hipc->Interface.h_uart, (uint8_t*)&p_TxBuffer[cpt], 1, 10000)!= HAL_OK)
-        {
-            return(IPC_ERROR);
-        }
-    }
-    /* last char send with IT to inform client*/
-    if(HAL_UART_Transmit_IT(hipc->Interface.h_uart, (uint8_t*)&p_TxBuffer[bufsize - 1], 1)!= HAL_OK)
-    {
-        return(IPC_ERROR);
-    }
-#else
     /* send string in one block */
     while(1)
     {
@@ -400,13 +405,23 @@ IPC_Status_t IPC_send_uart(IPC_Handle_t *hipc, uint8_t* p_TxBuffer, uint16_t buf
       err = HAL_UART_Transmit_IT(hipc->Interface.h_uart, (uint8_t*)p_TxBuffer, bufsize);
       if(err !=  HAL_BUSY)
       {
-          break;
+        if ((hipc->UartBusyFlag == 1) && (hipc->Interface.interface_type == IPC_INTERFACE_UART))
+        {
+          hipc->UartBusyFlag = 0U;
+          while(HAL_UART_Receive_IT(hipc->Interface.h_uart, (uint8_t*)g_IPC_Devices_List[hipc->Device_ID].RxChar, 1) != HAL_OK)
+          {
+          }
+          PrintINFO("DTO : Receive rearmed...");
+        }
+        break;
       }
+
+
 #if (RTOS_USED == 1)
       osDelay(10);
 #endif /* RTOS_USED */
     }
-#endif
+
     return(IPC_OK);
 }
 
@@ -627,7 +642,7 @@ void IPC_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
     uint8_t device_id = find_Device(UartHandle);
     if (device_id != IPC_DEVICE_NOT_FOUND)
     {
-        /* TODO : what to do here ? */
+        /* TODO: add an error callback ? */
     }
 }
 
