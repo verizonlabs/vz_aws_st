@@ -64,9 +64,13 @@ const osSemaphoreDef_t os_semaphore_def_##name##index = { 0 }
 #define PrintDBG(format, args...)  TracePrint(DBG_CHAN_IPC, DBL_LVL_P1, "IPC:" format "\n\r", ## args)
 #define PrintErr(format, args...)  TracePrint(DBG_CHAN_IPC, DBL_LVL_ERR, "IPC ERROR:" format "\n\r", ## args)
 #elif (USE_PRINTF == 1)
-#define PrintINFO(format, args...)  printf("IPC:" format "\n\r", ## args)
-#define PrintDBG(format, args...)   printf("IPC:" format "\n\r", ## args)
-#define PrintErr(format, args...)   printf("IPC ERROR:" format "\n\r", ## args)
+#define PrintINFO(format, args...)  printf("IPC:" format "\r\n", ## args)
+#define PrintDBG(format, args...)   printf("IPC:" format "\r\n", ## args)
+#define PrintErr(format, args...)   printf("IPC ERROR:" format "\r\n", ## args)
+#elif (USE_CONFIGPRINTF_IPC == 1)
+#define PrintINFO(format, args...)  vLoggingPrintf("IPC:" format "\r\n", ## args)
+#define PrintDBG(format, args...)   vLoggingPrintf("IPC:" format "\r\n", ## args)
+#define PrintErr(format, args...)   vLoggingPrintf("IPC ERROR:" format "\r\n", ## args)
 #else
 #define PrintINFO(format, args...)  do {} while(0)
 #define PrintDBG(format, args...)   do {} while(0)
@@ -543,7 +547,7 @@ void IPC_dump_RX_queue_uart(IPC_Handle_t *hipc, uint8_t readable)
     IPC_RxHeader_t header;
     uint16_t dump_index, first_uncomplete_header, first_uncomplete_size;
 
-#if (USE_TRACE_IPC == 1) || (USE_PRINTF == 1)
+#if (USE_TRACE_INTERFACE_IPC == 1) || (USE_PRINTF == 1) || (USE_CONFIGPRINTF_IPC == 1)
     uint16_t last_index;
 #endif
 
@@ -554,14 +558,14 @@ void IPC_dump_RX_queue_uart(IPC_Handle_t *hipc, uint8_t readable)
     first_uncomplete_header = hipc->RxQueue.current_msg_index;
     first_uncomplete_size = hipc->RxQueue.current_msg_size;
     dump_index = hipc->RxQueue.index_read;
-#if (USE_TRACE_IPC == 1) || (USE_PRINTF == 1)
+#if (USE_TRACE_INTERFACE_IPC == 1) || (USE_PRINTF == 1) || (USE_CONFIGPRINTF_IPC == 1)
     last_index = hipc->RxQueue.index_write;
 #endif
 
     PrintINFO(" *** IPC state =%d ", hipc->State);
     PrintINFO(" *** First header position =%d ", dump_index);
     PrintINFO(" *** Last incomplete header position=%d ", first_uncomplete_header);
-#if (USE_TRACE_IPC == 1) || (USE_PRINTF == 1)
+#if (USE_TRACE_INTERFACE_IPC == 1) || (USE_PRINTF == 1) || (USE_CONFIGPRINTF_IPC == 1)
     PrintINFO(" *** Current write pos=%d ", last_index);
 #endif
 
