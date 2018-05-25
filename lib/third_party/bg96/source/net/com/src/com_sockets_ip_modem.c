@@ -377,7 +377,7 @@ static socket_desc_t *com_ip_modem_create_socket_desc(void)
     socket_desc->queue = osMessageCreate(osMessageQ(MODEM_QUEUE), NULL);
     if (socket_desc->queue == NULL)
     {
-      free(socket_desc);
+      vPortFree(socket_desc);
     }
     else
     {
@@ -469,7 +469,7 @@ static void com_ip_modem_delete_socket_desc(int32_t sock)
         socket_desc_list = socket_desc->next;
       }
       osMessageDelete(socket_desc->queue);
-      free(socket_desc);
+      vPortFree(socket_desc);
     }
   }
 
