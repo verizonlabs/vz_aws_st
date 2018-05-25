@@ -54,6 +54,7 @@
 #include "aws_dev_mode_key_provisioning.h"
 #include "aws_secure_sockets.h"
 #include "aws_bg96_modem.h"
+#include "dc_mems.h"
 
 /* Logging Task Defines. */
 #define mainLOGGING_MESSAGE_QUEUE_LENGTH    ( 15 )
@@ -129,7 +130,7 @@ void vApplicationDaemonTaskStartupHook( void )
 {
 
     /* A simple example to demonstrate key and certificate provisioning in
-     * microcontroller flash using PKCS#11 interface. This should be replaced
+     * micro-controller flash using PKCS#11 interface. This should be replaced
      * by production ready key provisioning mechanism. */
     vDevModeKeyProvisioning();
 
@@ -139,8 +140,11 @@ void vApplicationDaemonTaskStartupHook( void )
     	/* Static initialization of the BG96 modem */
     	BG96_Modem_Init();
 
-    	/* Start to the BG96 modem before running the demos */
+    	/* Starts the BG96 modem tasks before running the demos */
         BG96_Modem_Start();
+
+        /* Start the mems data cache */
+        dc_mems_start();
 
     	DEMO_RUNNER_RunDemos();
     }
