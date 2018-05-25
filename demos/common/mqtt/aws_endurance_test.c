@@ -79,7 +79,7 @@
 /* Demo includes. */
 #include "aws_demo_config.h"
 #include "aws_endurance_test.h"
-#include "dc_mems.h"
+#include "dc_data.h"
 
 
 /**
@@ -92,7 +92,7 @@
 /**
  * @brief The topic that the MQTT client both subscribes and publishes to.
  */
-#define echoTOPIC_NAME         ( ( const uint8_t * ) "freertos/demos/data/" )
+#define echoTOPIC_NAME         ( ( const uint8_t * ) "freertos/demos/data" )
 
 /**
  * @brief The string appended to messages that are echoed back to the MQTT broker.
@@ -105,7 +105,7 @@
  * @brief Dimension of the character array buffers used to hold data (strings in
  * this case) that is published to and received from the MQTT broker (in the cloud).
  */
-#define echoMAX_DATA_LENGTH    20
+#define echoMAX_DATA_LENGTH    350
 
 /**
  * @brief A block time of 0 simply means "don't block".
@@ -190,6 +190,14 @@ static MessageBufferHandle_t xEchoMessageBuffer = NULL;
  * @ brief The handle of the MQTT client object used by the MQTT echo demo.
  */
 static MQTTAgentHandle_t xMQTTHandle = NULL;
+
+dc_pressure_rt_info_t        pressure_info;
+dc_humidity_rt_info_t        humidity_info;
+dc_temperature_rt_info_t     temperature_info;
+dc_accelerometer_rt_info_t   accelerometer_info;
+dc_gyroscope_rt_info_t       gyroscope_info;
+dc_magnetometer_rt_info_t    magnetometer_info;
+uint32_t 					 prvIteration= 0;
 
 /*-----------------------------------------------------------*/
 
@@ -320,7 +328,27 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
     /* Create the message that will be published, which is of the form "Hello World n"
      * where n is a monotonically increasing number. Note that snprintf appends
      * terminating null character to the cDataBuffer. */
-    ( void ) snprintf( cDataBuffer, echoMAX_DATA_LENGTH, "Hello CLS %d", ( int ) xMessageNumber );
+    /*  Reading All data information from the buffer info */
+    prvIteration++;
+    dc_com_read (&dc_com_db, DC_COM_PRESSURE, (void*)&pressure_info, sizeof(pressure_info)); /*  Reading Pressure info */
+    dc_com_read (&dc_com_db, DC_COM_TEMPERATURE, (void*)&temperature_info, sizeof(temperature_info));
+    dc_com_read (&dc_com_db, DC_COM_HUMIDITY, (void*)&humidity_info, sizeof(humidity_info));
+    dc_com_read (&dc_com_db, DC_COM_GYROSCOPE, (void*)&gyroscope_info, sizeof(gyroscope_info));
+    dc_com_read (&dc_com_db, DC_COM_MAGNETOMETER, (void*)&magnetometer_info, sizeof(magnetometer_info));
+    /* ( void ) snprintf( cDataBuffer, echoMAX_DATA_LENGTH, "Hello CLS %d", ( int ) xMessageNumber );  */
+    /* ( void ) snprintf( cDataBuffer, echoMAX_DATA_LENGTH, "Pr Info %5.2f", pressure_info.pressure ); */
+    ( void ) snprintf( cDataBuffer, echoMAX_DATA_LENGTH,
+    		"{\"Counter\":\"%d\",\"Press\":\"%5.2f\",\"Temp\":\"%5.2f\",\"Hum\":\"%5.2f\",\"Gyro_X\":\"%d\",\"Gyro_Y\":\"%d\",\"Gyro_Z\":\"%d\",\"Magn_X\":\"%d\",\"Magn_Y\":\"%d\",\"Magn_Z\":\"%d\"}",
+    				prvIteration,
+					pressure_info.pressure,
+    				temperature_info.temperature,
+					humidity_info.humidity,
+					gyroscope_info.gyroscope.AXIS_X,
+					gyroscope_info.gyroscope.AXIS_Y,
+					gyroscope_info.gyroscope.AXIS_Z,
+					magnetometer_info.magnetometer.AXIS_X,
+					magnetometer_info.magnetometer.AXIS_Y,
+					magnetometer_info.magnetometer.AXIS_Z);
 
     /* Setup the publish parameters. */
     memset( &( xPublishParameters ), 0x00, sizeof( xPublishParameters ) );
@@ -337,7 +365,8 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
 
     if( xReturned == eMQTTAgentSuccess )
     {
-        configPRINTF( ( "Echo successfully published '%s'\r\n", cDataBuffer ) );
+        configPRINTF( ( "Echo successfully published %s %d\r\n", "Message # ", prvIteration  ) );
+
         ( void )prvMQTT_Status_Set(MQTT_Connected);
 
     }
@@ -398,7 +427,7 @@ static void prvMessageEchoingTask( void * pvParameters )
 
             if( xReturned == eMQTTAgentSuccess )
             {
-                configPRINTF( ( "Message returned with ACK: '%s'\r\n", cDataBuffer ) );
+                configPRINTF( ( "Return ACK from:%s %d\r\n", "Message #", prvIteration ) );
                 ( void )prvMQTT_Status_Set(MQTT_Connected);
             }
             else
