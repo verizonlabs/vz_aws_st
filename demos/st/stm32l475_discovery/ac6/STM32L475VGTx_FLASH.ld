@@ -146,22 +146,30 @@ SECTIONS
     *(.data*)          /* .data* sections */
     . = ALIGN(8);
     _edata = .;        /* define a global symbol at data end */
-  } >RAM2 AT> FLASH
+  } >RAM AT> FLASH
 
+  _sidata2 = LOADADDR(.data2);
+  .data2 : 
+  {
+    . = ALIGN(8);
+    _sdata2 = .;        /* create a global symbol at data start */
+    *(.freertos_heap2)
+    . = ALIGN(8);
+    _edata2 = .;        /* define a global symbol at data end */
+  } >RAM2 AT> FLASH
   
   /* Uninitialized data section */
-  . = ALIGN(8);
+  . = ALIGN(4);
   .bss :
   {
     /* This is used by the startup in order to initialize the .bss secion */
     _sbss = .;         /* define a global symbol at bss start */
     __bss_start__ = _sbss;
-    *(.freertos_heap2)
     *(.bss)
     *(.bss*)
-    *(COMMON)   
+    *(COMMON)
 
-    . = ALIGN(8);
+    . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
   } >RAM
