@@ -851,6 +851,7 @@ static BaseType_t prvSetupConnection( const MQTTEventData_t * const pxEventData 
     size_t xURLLength;
     MQTTBrokerConnection_t * pxConnection = &( xMQTTConnections[ pxEventData->uxBrokerNumber ] );
     char * ppcAlpns[] = { socketsAWS_IOT_ALPN_MQTT };
+    int32_t xulAddress = 0;
 
     /* Should not get here if the socket used to communicate with the
      * broker is already connected. */
@@ -873,101 +874,112 @@ static BaseType_t prvSetupConnection( const MQTTEventData_t * const pxEventData 
             xMQTTServerAddress.usPort = SOCKETS_htons( pxEventData->u.pxConnectParams->usPort );
         }
 
-        xMQTTServerAddress.ulAddress = SOCKETS_GetHostByName( pxEventData->u.pxConnectParams->pcURL );
-        xMQTTServerAddress.ucSocketDomain = SOCKETS_AF_INET;
+        xulAddress = SOCKETS_GetHostByName( pxEventData->u.pxConnectParams->pcURL );
 
-        /* Create the socket. */
-        pxConnection->xSocket = SOCKETS_Socket( SOCKETS_AF_INET, SOCKETS_SOCK_STREAM, SOCKETS_IPPROTO_TCP );
+        /* check if we received a valid address before */
 
-        if( pxConnection->xSocket != SOCKETS_INVALID_SOCKET )
+        if (xulAddress != 0)
         {
-            /* Set a callback function that will unblock the MQTT task when data
-             * is received on a socket. */
-            ( void ) SOCKETS_SetSockOpt( pxConnection->xSocket,
-                                         0,                                            /* Level - Unused. */
-                                         SOCKETS_SO_WAKEUP_CALLBACK,
-                                         ( void * ) prvMQTTClientSocketWakeupCallback, /*lint !e9087 !e9074 The cast is ok as we are setting the callback here. */
-                                         sizeof( &( prvMQTTClientSocketWakeupCallback ) ) );
+        	xMQTTServerAddress.ulAddress = xulAddress;
+        	xMQTTServerAddress.ucSocketDomain = SOCKETS_AF_INET;
 
-            /* Set secure socket option if it is a secured connection. */
-            if( ( pxConnection->uxFlags & mqttCONNECTION_SECURED ) == mqttCONNECTION_SECURED )
-            {
-                if( SOCKETS_SetSockOpt( pxConnection->xSocket,
-                                        0, /* Level - Unused. */
-                                        SOCKETS_SO_REQUIRE_TLS,
-                                        NULL,
-                                        0 ) != SOCKETS_ERROR_NONE )
-                {
-                    xStatus = pdFAIL;
-                }
+			/* Create the socket. */
+			pxConnection->xSocket = SOCKETS_Socket( SOCKETS_AF_INET, SOCKETS_SOCK_STREAM, SOCKETS_IPPROTO_TCP );
 
-                /* If a certificate is supplied, set it. */
-                if( ( xStatus == pdPASS ) &&
-                    ( pxEventData->u.pxConnectParams->pcCertificate != NULL ) )
-                {
-                    if( SOCKETS_SetSockOpt( pxConnection->xSocket,
-                                            0, /* Level - Unused. */
-                                            SOCKETS_SO_TRUSTED_SERVER_CERTIFICATE,
-                                            pxEventData->u.pxConnectParams->pcCertificate,
-                                            pxEventData->u.pxConnectParams->ulCertificateSize ) != SOCKETS_ERROR_NONE )
-                    {
-                        xStatus = pdFAIL;
-                    }
-                }
+			if( pxConnection->xSocket != SOCKETS_INVALID_SOCKET )
+			{
+				/* Set a callback function that will unblock the MQTT task when data
+				 * is received on a socket. */
+				( void ) SOCKETS_SetSockOpt( pxConnection->xSocket,
+											 0,                                            /* Level - Unused. */
+											 SOCKETS_SO_WAKEUP_CALLBACK,
+											 ( void * ) prvMQTTClientSocketWakeupCallback, /*lint !e9087 !e9074 The cast is ok as we are setting the callback here. */
+											 sizeof( &( prvMQTTClientSocketWakeupCallback ) ) );
 
-                /* Use SNI if the provided URL is not IP address. */
-                if( ( xStatus == pdPASS ) &&
-                    ( ( pxEventData->u.pxConnectParams->xFlags & mqttagentURL_IS_IP_ADDRESS ) == 0 ) &&
-                    ( pxEventData->u.pxConnectParams->xURLIsIPAddress == pdFALSE ) )
-                {
-                    if( SOCKETS_SetSockOpt( pxConnection->xSocket,
-                                            0, /* Level - Unused. */
-                                            SOCKETS_SO_SERVER_NAME_INDICATION,
-                                            pxEventData->u.pxConnectParams->pcURL,
-                                            ( size_t ) 1 + xURLLength ) != SOCKETS_ERROR_NONE )
-                    {
-                        xStatus = pdFAIL;
-                    }
-                }
+				/* Set secure socket option if it is a secured connection. */
+				if( ( pxConnection->uxFlags & mqttCONNECTION_SECURED ) == mqttCONNECTION_SECURED )
+				{
+					if( SOCKETS_SetSockOpt( pxConnection->xSocket,
+											0, /* Level - Unused. */
+											SOCKETS_SO_REQUIRE_TLS,
+											NULL,
+											0 ) != SOCKETS_ERROR_NONE )
+					{
+						xStatus = pdFAIL;
+					}
 
-                /* Negotiate ALPN if requested. */
-                if( ( xStatus == pdPASS ) &&
-                    ( ( ( pxEventData->u.pxConnectParams->xFlags & mqttagentUSE_AWS_IOT_ALPN_443 ) ) != 0 ) )
-                {
-                    if( SOCKETS_SetSockOpt( pxConnection->xSocket,
-                                            0, /* Level - Unused. */
-                                            SOCKETS_SO_ALPN_PROTOCOLS,
-                                            ppcAlpns,
-                                            sizeof( ppcAlpns ) / sizeof( ppcAlpns[ 0 ] ) ) != SOCKETS_ERROR_NONE )
-                    {
-                        xStatus = pdFAIL;
-                    }
-                }
-            }
+					/* If a certificate is supplied, set it. */
+					if( ( xStatus == pdPASS ) &&
+						( pxEventData->u.pxConnectParams->pcCertificate != NULL ) )
+					{
+						if( SOCKETS_SetSockOpt( pxConnection->xSocket,
+												0, /* Level - Unused. */
+												SOCKETS_SO_TRUSTED_SERVER_CERTIFICATE,
+												pxEventData->u.pxConnectParams->pcCertificate,
+												pxEventData->u.pxConnectParams->ulCertificateSize ) != SOCKETS_ERROR_NONE )
+						{
+							xStatus = pdFAIL;
+						}
+					}
 
-            /* Establish the connection. */
-            if( xStatus == pdPASS )
-            {
-                if( SOCKETS_Connect( pxConnection->xSocket, &xMQTTServerAddress, sizeof( xMQTTServerAddress ) ) != SOCKETS_ERROR_NONE )
-                {
-                    xStatus = pdFAIL;
-                }
-            }
+					/* Use SNI if the provided URL is not IP address. */
+					if( ( xStatus == pdPASS ) &&
+						( ( pxEventData->u.pxConnectParams->xFlags & mqttagentURL_IS_IP_ADDRESS ) == 0 ) &&
+						( pxEventData->u.pxConnectParams->xURLIsIPAddress == pdFALSE ) )
+					{
+						if( SOCKETS_SetSockOpt( pxConnection->xSocket,
+												0, /* Level - Unused. */
+												SOCKETS_SO_SERVER_NAME_INDICATION,
+												pxEventData->u.pxConnectParams->pcURL,
+												( size_t ) 1 + xURLLength ) != SOCKETS_ERROR_NONE )
+						{
+							xStatus = pdFAIL;
+						}
+					}
 
-            if( xStatus == pdPASS )
-            {
-                /* Do not block now onwards. */
-                ( void ) SOCKETS_SetSockOpt( pxConnection->xSocket,
-                                             0 /* Unused. */,
-                                             SOCKETS_SO_NONBLOCK,
-                                             NULL /* Unused. */,
-                                             0 /* Unused. */ );
-            }
-            else
-            {
-                /* Connection Failed. */
-                prvGracefulSocketClose( pxConnection );
-            }
+					/* Negotiate ALPN if requested. */
+					if( ( xStatus == pdPASS ) &&
+						( ( ( pxEventData->u.pxConnectParams->xFlags & mqttagentUSE_AWS_IOT_ALPN_443 ) ) != 0 ) )
+					{
+						if( SOCKETS_SetSockOpt( pxConnection->xSocket,
+												0, /* Level - Unused. */
+												SOCKETS_SO_ALPN_PROTOCOLS,
+												ppcAlpns,
+												sizeof( ppcAlpns ) / sizeof( ppcAlpns[ 0 ] ) ) != SOCKETS_ERROR_NONE )
+						{
+							xStatus = pdFAIL;
+						}
+					}
+				}
+
+				/* Establish the connection. */
+				if( xStatus == pdPASS )
+				{
+					if( SOCKETS_Connect( pxConnection->xSocket, &xMQTTServerAddress, sizeof( xMQTTServerAddress ) ) != SOCKETS_ERROR_NONE )
+					{
+						xStatus = pdFAIL;
+					}
+				}
+
+				if( xStatus == pdPASS )
+				{
+					/* Do not block now onwards. */
+					( void ) SOCKETS_SetSockOpt( pxConnection->xSocket,
+												 0 /* Unused. */,
+												 SOCKETS_SO_NONBLOCK,
+												 NULL /* Unused. */,
+												 0 /* Unused. */ );
+				}
+				else
+				{
+					/* Connection Failed. */
+					prvGracefulSocketClose( pxConnection );
+				}
+			}
+    	}
+        else
+        {
+        	xStatus = pdFAIL;
         }
     }
     else
