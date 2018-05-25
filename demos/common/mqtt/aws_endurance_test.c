@@ -1,5 +1,6 @@
 /*
- * Amazon FreeRTOS MQTT Echo Demo V1.2.3
+ * Amazon FreeRTOS MQTT Endurance Test V1.2.3
+ * Copyright (C) 2018 pureIntegration. All Rights Reserved
  * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -21,12 +22,13 @@
  *
  * http://aws.amazon.com/freertos
  * http://www.FreeRTOS.org
+ * https://pureintegration.com
  */
 
 
 /**
- * @file aws_hello_world.c
- * @brief A simple MQTT double echo example.
+ * @file aws_endurance_test.c
+ * @brief A simple MQTT client which periodically sends sensor data in JSON format.
  *
  * It creates an MQTT client that both subscribes to and publishes to the
  * same MQTT topic, as a result of which each time the MQTT client publishes
@@ -36,23 +38,23 @@
  * the broker (the second echo).
  *
  * The double echo allows a complete round trip to be observed from the AWS IoT
- * console itself.  The user can subscribe to "freertos/demos/echo" topic from
- * the AWS IoT Console and when executing correctly, the user will see 12 pairs
- * of strings, one pair (two strings) every five seconds for a minute.  The first
- * string of each pair takes the form "Hello World n", where 'n' is an monotonically
- * increasing integer.  This is the string originally published by the MQTT client.
- * The second string of each pair takes the form "Hello World n ACK".  This is the
- * string published by the MQTT client after it has received the first string back
- * from the MQTT broker.  The broker also sends the second string back to the
- * client, but the client ignores messages that already contain "ACK", so the
- * back and forth stops there.
+ * console itself.  The user can subscribe to "freertos/demos/data/#" topic from
+ * the AWS IoT Console and when executing correctly, the user will see pairs
+ * of strings, one pair (two strings) every five seconds for as long as . The first
+ * JSON message of each pair contains sensor data and a counter, where the counter
+ * is an monotonically increasing integer.  This is the JSON originally published
+ * by the MQTT client. The second string of each pair takes the form of the same
+ * JSON message appended by ACK. This is the JSON message published by the MQTT client
+ * after it has received the first string back from the MQTT broker.  The broker also
+ * sends the second message back to the client, but the client ignores messages that
+ * already contain "ACK", so the back and forth stops there.
  *
  * The demo uses two tasks. The task implemented by
  * prvMQTTConnectAndPublishTask() creates the MQTT client, subscribes to the
  * broker specified by the clientcredentialMQTT_BROKER_ENDPOINT constant,
  * performs the publish operations, and cleans up all the used resources after
  * a minute of operation.  The task implemented by prvMessageEchoingTask()
- * appends "ACK" to strings received from the MQTT broker and publishes them
+ * appends "ACK" to JSON messages received from the MQTT broker and publishes them
  * back to the broker.  Strings received from the MQTT broker are passed from
  * the MQTT callback function to prvMessageEchoingTask() over a FreeRTOS message
  * buffer.
@@ -76,7 +78,8 @@
 
 /* Demo includes. */
 #include "aws_demo_config.h"
-#include "aws_hello_world.h"
+#include "aws_endurance_test.h"
+#include "dc_mems.h"
 
 
 /**
@@ -89,7 +92,7 @@
 /**
  * @brief The topic that the MQTT client both subscribes and publishes to.
  */
-#define echoTOPIC_NAME         ( ( const uint8_t * ) "freertos/demos/echo/claude" )
+#define echoTOPIC_NAME         ( ( const uint8_t * ) "freertos/demos/data/" )
 
 /**
  * @brief The string appended to messages that are echoed back to the MQTT broker.
