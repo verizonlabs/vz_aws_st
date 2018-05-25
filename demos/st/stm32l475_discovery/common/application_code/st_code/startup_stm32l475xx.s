@@ -59,6 +59,13 @@ defined in linker script */
 .word	_sdata
 /* end address for the .data section. defined in linker script */
 .word	_edata
+/* start address for the initialization values of the .data2 section.
+defined in linker script */
+.word	_sidata2
+/* start address for the .data2 section. defined in linker script */
+.word	_sdata2
+/* end address for the .data2 section. defined in linker script */
+.word	_edata2
 /* start address for the .bss section. defined in linker script */
 .word	_sbss
 /* end address for the .bss section. defined in linker script */
@@ -96,8 +103,25 @@ LoopCopyDataInit:
 	adds	r2, r0, r1
 	cmp	r2, r3
 	bcc	CopyDataInit
+	movs	r1, #0
+	ldr	r2, =_sdata2
+	b	LoopCopyDataInit2
+
+CopyDataInit2:
+	ldr	r3, =_sidata2
+	ldr	r3, [r3, r1]
+	str	r3, [r0, r1]
+	adds	r1, r1, #4
+
+LoopCopyDataInit2:
+	ldr	r0, =_sdata2
+	ldr	r3, =_edata2
+	adds	r2, r0, r1
+	cmp	r2, r3
+	bcc	CopyDataInit2
 	ldr	r2, =_sbss
 	b	LoopFillZerobss
+
 /* Zero fill the bss segment. */
 FillZerobss:
 	movs	r3, #0
