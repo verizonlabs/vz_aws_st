@@ -84,7 +84,7 @@
 #endif
 
 /* MEMS not available for for AkorloT board */
-#define USE_DC_MEMS        (0) /* 0: not activated, 1: activated */
+#define USE_DC_MEMS        (1) /* 0: not activated, 1: activated */
 #define USE_SIMU_MEMS      (0) /* 0: not activated, 1: activated */
 
 #define USE_DC_EMUL        (0) /* 0: not activated, 1: activated */
