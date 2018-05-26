@@ -377,14 +377,14 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
 
     if( xReturned == eMQTTAgentSuccess )
     {
-        configPRINTF( ( "Echo successfully published %s %d\r\n", "Message # ", prvIteration  ) );
+        configPRINTF( ( "Echo successfully published  Message# %d\r\n", prvIteration  ) );
 
         ( void )prvMQTT_Status_Set(MQTT_Connected);
 
     }
     else
     {
-        configPRINTF( ( "ERROR:  Echo failed to publish '%s'\r\n", cDataBuffer ) );
+        configPRINTF( ( "ERROR:  Echo failed to publish Message# %d\r\n", prvIteration ) );
         ( void )prvMQTT_Status_Set(MQTT_Disconnected);
     }
 
