@@ -92,7 +92,8 @@
 /**
  * @brief The topic that the MQTT client both subscribes and publishes to.
  */
-#define echoTOPIC_NAME         ( ( const uint8_t * ) "freertos/demos/data" )
+const char *  echoTOPIC_ROOT      = "freertos/demos/data/";
+const char *  echoTOPIC_EXTENTION = ( const char * ) echoCLIENT_ID;
 
 /**
  * @brief The string appended to messages that are echoed back to the MQTT broker.
@@ -105,7 +106,8 @@
  * @brief Dimension of the character array buffers used to hold data (strings in
  * this case) that is published to and received from the MQTT broker (in the cloud).
  */
-#define echoMAX_DATA_LENGTH    350
+#define echoMAX_DATA_LENGTH		350
+#define topic_name_size			50
 
 /**
  * @brief A block time of 0 simply means "don't block".
@@ -191,15 +193,18 @@ static MessageBufferHandle_t xEchoMessageBuffer = NULL;
  */
 static MQTTAgentHandle_t xMQTTHandle = NULL;
 
-dc_pressure_rt_info_t        pressure_info;
-dc_humidity_rt_info_t        humidity_info;
-dc_temperature_rt_info_t     temperature_info;
-dc_accelerometer_rt_info_t   accelerometer_info;
-dc_gyroscope_rt_info_t       gyroscope_info;
-dc_magnetometer_rt_info_t    magnetometer_info;
-uint32_t 					 prvIteration= 0;
+static dc_pressure_rt_info_t        pressure_info;
+static dc_humidity_rt_info_t        humidity_info;
+static dc_temperature_rt_info_t     temperature_info;
+static dc_accelerometer_rt_info_t   accelerometer_info;
+static dc_gyroscope_rt_info_t       gyroscope_info;
+static dc_magnetometer_rt_info_t    magnetometer_info;
+static uint32_t 					prvIteration= 0;
+static uint32_t					 	prvTmeperature_Fraction=0;
+static uint32_t					 	prvPresure_Fraction=0;
+static uint32_t					 	prvHumidity_Fraction=0;
+static uint8_t               		prvTOPIC_NAME[topic_name_size];
 
-/*-----------------------------------------------------------*/
 
 static BaseType_t prvCreateClientAndConnectToBroker( void )
 {
@@ -335,26 +340,33 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
     dc_com_read (&dc_com_db, DC_COM_HUMIDITY, (void*)&humidity_info, sizeof(humidity_info));
     dc_com_read (&dc_com_db, DC_COM_GYROSCOPE, (void*)&gyroscope_info, sizeof(gyroscope_info));
     dc_com_read (&dc_com_db, DC_COM_MAGNETOMETER, (void*)&magnetometer_info, sizeof(magnetometer_info));
-    /* ( void ) snprintf( cDataBuffer, echoMAX_DATA_LENGTH, "Hello CLS %d", ( int ) xMessageNumber );  */
-    /* ( void ) snprintf( cDataBuffer, echoMAX_DATA_LENGTH, "Pr Info %5.2f", pressure_info.pressure ); */
-    ( void ) snprintf( cDataBuffer, echoMAX_DATA_LENGTH,
-    		"{\"Counter\":\"%d\",\"Press\":\"%5.2f\",\"Temp\":\"%5.2f\",\"Hum\":\"%5.2f\",\"Gyro_X\":\"%d\",\"Gyro_Y\":\"%d\",\"Gyro_Z\":\"%d\",\"Magn_X\":\"%d\",\"Magn_Y\":\"%d\",\"Magn_Z\":\"%d\"}",
-    				prvIteration,
-					pressure_info.pressure,
-    				temperature_info.temperature,
-					humidity_info.humidity,
-					gyroscope_info.gyroscope.AXIS_X,
-					gyroscope_info.gyroscope.AXIS_Y,
-					gyroscope_info.gyroscope.AXIS_Z,
-					magnetometer_info.magnetometer.AXIS_X,
-					magnetometer_info.magnetometer.AXIS_Y,
-					magnetometer_info.magnetometer.AXIS_Z);
 
+    prvTmeperature_Fraction = (temperature_info.temperature - (int32_t)temperature_info.temperature) *100 ;
+    prvPresure_Fraction     = (pressure_info.pressure - (int32_t)pressure_info.pressure) *100;
+    prvHumidity_Fraction    = (humidity_info.humidity- (int32_t)humidity_info.humidity) *100;
+
+    ( void ) snprintf( cDataBuffer, echoMAX_DATA_LENGTH,
+    		"{\"Counter\":\"%d\",\"Press\":\"%i.%2d\",\"Temp\":\"%i.%2d\",\"Hum\":\"%i.%2d\",\"Gyro_X\":\"%d\",\"Gyro_Y\":\"%d\",\"Gyro_Z\":\"%d\",\"Magn_X\":\"%d\",\"Magn_Y\":\"%d\",\"Magn_Z\":\"%d\"}",
+    				prvIteration,
+					(int)pressure_info.pressure,
+					(int) prvPresure_Fraction,
+					(int)temperature_info.temperature,
+					(int) prvTmeperature_Fraction,
+					(int)humidity_info.humidity,
+					(int)prvHumidity_Fraction,
+					(int)gyroscope_info.gyroscope.AXIS_X,
+					(int)gyroscope_info.gyroscope.AXIS_Y,
+					(int)gyroscope_info.gyroscope.AXIS_Z,
+					(int)magnetometer_info.magnetometer.AXIS_X,
+					(int)magnetometer_info.magnetometer.AXIS_Y,
+					(int)magnetometer_info.magnetometer.AXIS_Z);
     /* Setup the publish parameters. */
+    strcpy(prvTOPIC_NAME,echoTOPIC_ROOT);
+    strcat(prvTOPIC_NAME,echoTOPIC_EXTENTION);
     memset( &( xPublishParameters ), 0x00, sizeof( xPublishParameters ) );
-    xPublishParameters.pucTopic = echoTOPIC_NAME;
+    xPublishParameters.pucTopic = prvTOPIC_NAME;
     xPublishParameters.pvData = cDataBuffer;
-    xPublishParameters.usTopicLength = ( uint16_t ) strlen( ( const char * ) echoTOPIC_NAME );
+    xPublishParameters.usTopicLength = ( uint16_t ) strlen( ( const char * ) prvTOPIC_NAME );
     xPublishParameters.ulDataLength = ( uint32_t ) strlen( cDataBuffer );
     xPublishParameters.xQoS = eMQTTQoS1;
 
@@ -385,7 +397,7 @@ static void prvMessageEchoingTask( void * pvParameters )
 {
     MQTTAgentPublishParams_t xPublishParameters;
     MQTTAgentReturnCode_t xReturned;
-    char cDataBuffer[ echoMAX_DATA_LENGTH * 2 ];
+    char cDataBuffer[ echoMAX_DATA_LENGTH];
     size_t xBytesReceived;
 
     /* Remove compiler warnings about unused parameters. */
@@ -395,9 +407,12 @@ static void prvMessageEchoingTask( void * pvParameters )
     configASSERT( xMQTTHandle != NULL );
     configASSERT( xEchoMessageBuffer != NULL );
 
+    strcpy(prvTOPIC_NAME,echoTOPIC_ROOT);
+    strcat(prvTOPIC_NAME,echoTOPIC_EXTENTION);
+
     /* Setup the publish parameters. */
-    xPublishParameters.pucTopic = echoTOPIC_NAME;
-    xPublishParameters.usTopicLength = ( uint16_t ) strlen( ( const char * ) echoTOPIC_NAME );
+    xPublishParameters.pucTopic = prvTOPIC_NAME;
+    xPublishParameters.usTopicLength = ( uint16_t ) strlen( ( const char * ) prvTOPIC_NAME );
     xPublishParameters.pvData = cDataBuffer;
     xPublishParameters.xQoS = eMQTTQoS1;
 
@@ -432,7 +447,7 @@ static void prvMessageEchoingTask( void * pvParameters )
             }
             else
             {
-                configPRINTF( ( "ERROR:  Could not return message with ACK: '%s'\r\n", cDataBuffer ) );
+                configPRINTF( ( "ERROR:  Could not return message # %d with ACK\r\n", prvIteration ) );
                 ( void )prvMQTT_Status_Set(MQTT_Disconnected);
             }
         }
@@ -453,10 +468,12 @@ static BaseType_t prvSubscribe( void )
     MQTTAgentSubscribeParams_t xSubscribeParams;
 
     /* Setup subscribe parameters to subscribe to echoTOPIC_NAME topic. */
-    xSubscribeParams.pucTopic = echoTOPIC_NAME;
+    strcpy(prvTOPIC_NAME,echoTOPIC_ROOT);
+    strcat(prvTOPIC_NAME,echoTOPIC_EXTENTION);
+    xSubscribeParams.pucTopic = prvTOPIC_NAME;
     xSubscribeParams.pvPublishCallbackContext = NULL;
     xSubscribeParams.pxPublishCallback = prvMQTTCallback;
-    xSubscribeParams.usTopicLength = ( uint16_t ) strlen( ( const char * ) echoTOPIC_NAME );
+    xSubscribeParams.usTopicLength = ( uint16_t ) strlen( ( const char * ) prvTOPIC_NAME );
     xSubscribeParams.xQoS = eMQTTQoS1;
 
     /* Subscribe to the topic. */
@@ -466,12 +483,12 @@ static BaseType_t prvSubscribe( void )
 
     if( xReturned == eMQTTAgentSuccess )
     {
-        configPRINTF( ( "MQTT Echo demo subscribed to %s\r\n", echoTOPIC_NAME ) );
+        configPRINTF( ( "MQTT Echo demo subscribed to %s\r\n", prvTOPIC_NAME ) );
         xReturn = pdPASS;
     }
     else
     {
-        configPRINTF( ( "ERROR:  MQTT Echo demo could not subscribe to %s\r\n", echoTOPIC_NAME ) );
+        configPRINTF( ( "ERROR:  MQTT Echo demo could not subscribe to %s\r\n", prvTOPIC_NAME) );
         xReturn = pdFAIL;
     }
 
@@ -489,8 +506,8 @@ static MQTTBool_t prvMQTTCallback( void * pvUserData,
     ( void ) pvUserData;
 
     /* Don't expect the callback to be invoked for any other topics. */
-    configASSERT( ( size_t ) ( pxPublishParameters->usTopicLength ) == strlen( ( const char * ) echoTOPIC_NAME ) );
-    configASSERT( memcmp( pxPublishParameters->pucTopic, echoTOPIC_NAME, ( size_t ) ( pxPublishParameters->usTopicLength ) ) == 0 );
+    configASSERT( ( size_t ) ( pxPublishParameters->usTopicLength ) == strlen( ( const char * ) prvTOPIC_NAME ) );
+    configASSERT( memcmp( pxPublishParameters->pucTopic, prvTOPIC_NAME, ( size_t ) ( pxPublishParameters->usTopicLength ) ) == 0 );
 
     /* THe ulBytesToCopy has already been initialized to ensure it does not copy
      * more bytes than will fit in the buffer.  Now check it does not copy more
@@ -547,12 +564,12 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
     {
         /* Create the task that echoes data received in the callback back to the
          * MQTT broker. */
-        xReturned = xTaskCreate( prvMessageEchoingTask,               /* The function that implements the task. */
-                                 "Echoing",                           /* Human readable name for the task. */
-                                 democonfigMQTT_ECHO_TASK_STACK_SIZE, /* Size of the stack to allocate for the task, in words not bytes! */
-                                 NULL,                                /* The task parameter is not used. */
-                                 tskIDLE_PRIORITY,                    /* Runs at the lowest priority. */
-                                 &( xEchoingTask ) );                 /* The handle is stored so the created task can be deleted again at the end of the demo. */
+        xReturned = xTaskCreate( prvMessageEchoingTask,               	  /* The function that implements the task. */
+                                 "Echoing",                           	  /* Human readable name for the task. */
+								 democonfigMQTT_ENDURANCE_TASK_STACK_SIZE,/* Size of the stack to allocate for the task, in words not bytes! */
+                                 NULL,                                	  /* The task parameter is not used. */
+                                 tskIDLE_PRIORITY,                    	  /* Runs at the lowest priority. */
+                                 &( xEchoingTask ) );                 	  /* The handle is stored so the created task can be deleted again at the end of the demo. */
 
         if( xReturned != pdPASS )
         {
@@ -615,7 +632,7 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
         	configPRINTF( ( "Heap: %d bytes left\r\n", xPortGetMinimumEverFreeHeapSize() ) );
 
             /* Five seconds delay between publishes. */
-            vTaskDelay( xFiveSeconds );
+            vTaskDelay( xFiveSeconds * 2);
         }
     }
 
@@ -645,12 +662,12 @@ void vStartMQTTEnduranceDemo( void )
     /* Create the task that publishes messages to the MQTT broker every five
      * seconds.  This task, in turn, creates the task that echoes data received
      * from the broker back to the broker. */
-    ( void ) xTaskCreate( prvMQTTConnectAndPublishTask,        /* The function that implements the demo task. */
-                          "MQTTEcho",                          /* The name to assign to the task being created. */
-                          democonfigMQTT_ECHO_TASK_STACK_SIZE, /* The size, in WORDS (not bytes), of the stack to allocate for the task being created. */
-                          NULL,                                /* The task parameter is not being used. */
-                          democonfigMQTT_ECHO_TASK_PRIORITY,   /* The priority at which the task being created will run. */
-                          NULL );                              /* Not storing the task's handle. */
+    ( void ) xTaskCreate( prvMQTTConnectAndPublishTask,        		/* The function that implements the demo task. */
+                          "MQTTEcho",                          		/* The name to assign to the task being created. */
+						  democonfigMQTT_ENDURANCE_TASK_STACK_SIZE, /* The size, in WORDS (not bytes), of the stack to allocate for the task being created. */
+                          NULL,                                		/* The task parameter is not being used. */
+						  democonfigMQTT_ENDURANCE_TASK_PRIORITY,   /* The priority at which the task being created will run. */
+                          NULL );                              		/* Not storing the task's handle. */
 }
 /*-----------------------------------------------------------*/
 
