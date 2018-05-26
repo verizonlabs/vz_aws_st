@@ -681,14 +681,18 @@ static void com_socket_datacache_cb(dc_com_event_id_t dc_event_id, void* private
 
       if (dc_nifman_rt_info.rt_state == DC_SERVICE_ON)
       {
+    	taskENTER_CRITICAL();
         network_is_up = true;
+        taskEXIT_CRITICAL();
         com_socket_stat_update(COM_SOCKET_STAT_NWK_UP);
       }
       else
       {
         if (network_is_up == true)
         {
+          taskENTER_CRITICAL();
           network_is_up = false;
+          taskEXIT_CRITICAL();
           com_socket_stat_update(COM_SOCKET_STAT_NWK_DWN);
         }
       }
