@@ -359,7 +359,7 @@ static BaseType_t prvNetworkRecv( void * pvContext,
     	else if (( xReceiveValue >= minMESSAGE_SIZE ) || (xReceiveValue == xReceiveBufferLength))
     	{
     		/* We received enough data and need to pass it back */
-    		xTotalBytesReceived =  xReceiveValue;
+    		xTotalBytesReceived +=  xReceiveValue;
     	    break;
     	}
     	else
