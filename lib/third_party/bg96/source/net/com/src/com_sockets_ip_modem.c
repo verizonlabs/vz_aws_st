@@ -607,12 +607,12 @@ static void com_ip_modem_data_ready_cb(socket_handle_t sock)
   socket_desc = com_ip_modem_find_socket(sock);
 
   if (   (socket_desc != NULL)
-      && (socket_desc->closing == false))
-//      && (socket_desc->state   == SOCKET_WAITING_RSP))
+      && (socket_desc->closing == false)
+      && (socket_desc->state   == SOCKET_WAITING_RSP))
   {
     msg.type = SOCKET_DATA_RCV;
-    PrintINFO("callback socket data ready called: data ready");
     osMessagePut(socket_desc->queue, *(uint32_t*)&msg, 0);
+    PrintINFO("callback socket data ready called: data ready");
   }
   else
   {
@@ -627,7 +627,9 @@ static void com_ip_modem_data_ready_cb(socket_handle_t sock)
     }
     if (socket_desc->state != SOCKET_WAITING_RSP)
     {
-      PrintERR("callback socket data ready called: socket_state:%i NOK", socket_desc->state);
+      /* There is no one listening but this is a valid case as the socket can be opened
+       * but there is no one asking for data for now */
+      PrintINFO("CB socket data ready called: socket_state:%i", socket_desc->state);
     }
   }
 }
