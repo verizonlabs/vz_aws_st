@@ -56,29 +56,14 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>application_code/common_test/framework</name>
-			<type>2</type>
-			<locationURI>AWS_IOT_MCU_ROOT/tests/common/framework</locationURI>
-		</link>
-		<link>
 			<name>application_code/common_test/include</name>
 			<type>2</type>
 			<locationURI>AWS_IOT_MCU_ROOT/tests/common/include</locationURI>
 		</link>
 		<link>
-			<name>application_code/common_test/logging</name>
+			<name>application_code/common_test/source</name>
 			<type>2</type>
-			<locationURI>AWS_IOT_MCU_ROOT/demos/common/logging</locationURI>
-		</link>
-		<link>
-			<name>application_code/common_test/memory_leak</name>
-			<type>2</type>
-			<locationURI>AWS_IOT_MCU_ROOT/tests/common/memory_leak</locationURI>
-		</link>
-		<link>
-			<name>application_code/common_test/test_runner</name>
-			<type>2</type>
-			<locationURI>AWS_IOT_MCU_ROOT/tests/common/test_runner</locationURI>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>application_code/common_test/utils</name>
@@ -126,6 +111,11 @@
 			<locationURI>AWS_IOT_MCU_ROOT/lib/secure_sockets/portable/st/stm32l475_discovery</locationURI>
 		</link>
 		<link>
+			<name>lib/aws/shadow</name>
+			<type>2</type>
+			<locationURI>AWS_IOT_MCU_ROOT/lib/shadow</locationURI>
+		</link>
+		<link>
 			<name>lib/aws/tls</name>
 			<type>2</type>
 			<locationURI>AWS_IOT_MCU_ROOT/lib/tls</locationURI>
@@ -139,6 +129,11 @@
 			<name>lib/third_party/bg96</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>lib/third_party/jsmn</name>
+			<type>2</type>
+			<locationURI>AWS_IOT_MCU_ROOT/lib/third_party/jsmn</locationURI>
 		</link>
 		<link>
 			<name>lib/third_party/mbedtls</name>
@@ -159,6 +154,66 @@
 			<name>lib/third_party/unity</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_dev_mode_key_provisioning.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/common/devmode_key_provisioning/aws_dev_mode_key_provisioning.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_logging_task_dynamic_buffers.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/common/logging/aws_logging_task_dynamic_buffers.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_memory_leak.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/tests/common/memory_leak/aws_memory_leak.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_test_crypto.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/tests/common/crypto/aws_test_crypto.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_test_framework.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/tests/common/framework/aws_test_framework.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_test_mqtt_agent.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/tests/common/mqtt/aws_test_mqtt_agent.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_test_mqtt_lib.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/tests/common/mqtt/aws_test_mqtt_lib.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_test_pcks11.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/tests/common/pkcs11/aws_test_pkcs11.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_test_runner.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/tests/common/test_runner/aws_test_runner.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_test_shadow.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/tests/common/shadow/aws_test_shadow.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_test_tcp.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/tests/common/secure_sockets/aws_test_tcp.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/common_test/source/aws_test_tls.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/tests/common/tls/aws_test_tls.c</locationURI>
 		</link>
 		<link>
 			<name>lib/third_party/bg96/BSP</name>
