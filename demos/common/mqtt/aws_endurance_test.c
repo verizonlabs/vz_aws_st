@@ -100,7 +100,7 @@ const char *  echoTOPIC_EXTENTION = ( const char * ) echoCLIENT_ID;
  *
  * It is also used to detect if a received message has already been acknowledged.
  */
-#define echoACK_STRING         ( ( const char * ) " ACK" )
+#define echoACK_STRING         ( ( const char * ) ",\"ACK\":\"ACK\"}" )
 
 /**
  * @brief Dimension of the character array buffers used to hold data (strings in
@@ -325,6 +325,7 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
     MQTTAgentPublishParams_t xPublishParameters;
     MQTTAgentReturnCode_t xReturned;
     char cDataBuffer[ echoMAX_DATA_LENGTH ];
+    int xmessageLength;
 
     /* Check this function is not being called before the MQTT client object has
      * been created. */
@@ -345,7 +346,7 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
     prvPresure_Fraction     = (pressure_info.pressure - (int32_t)pressure_info.pressure) *100;
     prvHumidity_Fraction    = (humidity_info.humidity- (int32_t)humidity_info.humidity) *100;
 
-    ( void ) snprintf( cDataBuffer, echoMAX_DATA_LENGTH,
+    xmessageLength = snprintf( cDataBuffer, echoMAX_DATA_LENGTH,
     		"{\"Counter\":\"%d\",\"Press\":\"%i.%2d\",\"Temp\":\"%i.%2d\",\"Hum\":\"%i.%2d\",\"Gyro_X\":\"%d\",\"Gyro_Y\":\"%d\",\"Gyro_Z\":\"%d\",\"Magn_X\":\"%d\",\"Magn_Y\":\"%d\",\"Magn_Z\":\"%d\"}",
     				prvIteration,
 					(int)pressure_info.pressure,
@@ -377,8 +378,7 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
 
     if( xReturned == eMQTTAgentSuccess )
     {
-        configPRINTF( ( "Echo successfully published  Message# %d\r\n", prvIteration  ) );
-
+        configPRINTF( ( "Echo published Message# %d of Length %d\r\n", prvIteration, xmessageLength  ) );
         ( void )prvMQTT_Status_Set(MQTT_Connected);
 
     }
@@ -432,7 +432,7 @@ static void prvMessageEchoingTask( void * pvParameters )
             /* Append ACK to the received message. Note that
              * strcat appends terminating null character to the
              * cDataBuffer. */
-            strcat( cDataBuffer, echoACK_STRING );
+            memcpy( &cDataBuffer[strlen(cDataBuffer)-1],echoACK_STRING,strlen(echoACK_STRING));
             xPublishParameters.ulDataLength = ( uint32_t ) strlen( cDataBuffer );
 
             /* Publish the ACK message. */
@@ -550,7 +550,9 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
 {
     BaseType_t x, xReturned;
     const TickType_t xFiveSeconds = pdMS_TO_TICKS( 5000UL );
-    const BaseType_t xIterations = 3600 * 24;
+
+
+    const BaseType_t xIterations = 3600 * 24 * 100;
     TaskHandle_t xEchoingTask = NULL;
     uint32_t prvIncrement_timer = 0;
 
@@ -620,7 +622,7 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
 				else
 				{
 					configPRINTF( ( "MQTT Agents can't be started.\r\n" ) );
-					 vTaskDelay( xFiveSeconds * 5 );
+					 vTaskDelay( xFiveSeconds * prvIncrement_timer );
 				}
         	}
         	else
@@ -629,10 +631,10 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
 
         	}
 
-        	configPRINTF( ( "Heap: %d bytes left\r\n", xPortGetMinimumEverFreeHeapSize() ) );
+        	configPRINTF( ( "Heap: %d bytes left\r\n", xPortGetFreeHeapSize() ) );
 
-            /* Five seconds delay between publishes. */
-            vTaskDelay( xFiveSeconds * 2);
+            /*  Delay before next publication */
+            vTaskDelay( (const) pdMS_TO_TICKS( 1100UL ));
         }
     }
 
