@@ -720,9 +720,9 @@ int vsnprintf (char *str, size_t count, const char *fmt, va_list args)
 #ifndef HAVE_SNPRINTF
 /* VARARGS3 */
 #ifdef HAVE_STDARGS
-int snprintf (char *str,size_t count,const char *fmt,...)
+int prvSnprintf (char *str,size_t count,const char *fmt,...)
 #else
-int snprintf (va_alist) va_dcl
+int prvSnprintf (va_alist) va_dcl
 #endif
 {
 #ifndef HAVE_STDARGS

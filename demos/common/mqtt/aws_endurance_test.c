@@ -81,6 +81,7 @@
 #include "aws_endurance_test.h"
 #include "dc_data.h"
 
+extern int prvSnprintf (char *str,size_t count,const char *fmt,...);
 
 /**
  * @brief MQTT client ID.
@@ -193,6 +194,7 @@ static MessageBufferHandle_t xEchoMessageBuffer = NULL;
  */
 static MQTTAgentHandle_t xMQTTHandle = NULL;
 
+static dc_cellular_rt_info_t     dc_cellular_rt_info;
 static dc_pressure_rt_info_t        pressure_info;
 static dc_humidity_rt_info_t        humidity_info;
 static dc_temperature_rt_info_t     temperature_info;
@@ -200,9 +202,6 @@ static dc_accelerometer_rt_info_t   accelerometer_info;
 static dc_gyroscope_rt_info_t       gyroscope_info;
 static dc_magnetometer_rt_info_t    magnetometer_info;
 static uint32_t 					prvIteration= 0;
-static uint32_t					 	prvTmeperature_Fraction=0;
-static uint32_t					 	prvPresure_Fraction=0;
-static uint32_t					 	prvHumidity_Fraction=0;
 static uint8_t               		prvTOPIC_NAME[topic_name_size];
 
 
@@ -335,32 +334,36 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
      * where n is a monotonically increasing number. Note that snprintf appends
      * terminating null character to the cDataBuffer. */
     /*  Reading All data information from the buffer info */
-    prvIteration++;
+
+    dc_com_read (&dc_com_db, DC_COM_CELLULAR, (void*)&dc_cellular_rt_info,sizeof(dc_cellular_rt_info));
     dc_com_read (&dc_com_db, DC_COM_PRESSURE, (void*)&pressure_info, sizeof(pressure_info)); /*  Reading Pressure info */
     dc_com_read (&dc_com_db, DC_COM_TEMPERATURE, (void*)&temperature_info, sizeof(temperature_info));
     dc_com_read (&dc_com_db, DC_COM_HUMIDITY, (void*)&humidity_info, sizeof(humidity_info));
     dc_com_read (&dc_com_db, DC_COM_GYROSCOPE, (void*)&gyroscope_info, sizeof(gyroscope_info));
     dc_com_read (&dc_com_db, DC_COM_MAGNETOMETER, (void*)&magnetometer_info, sizeof(magnetometer_info));
+    dc_com_read (&dc_com_db, DC_COM_ACCELEROMETER, (void*)&accelerometer_info, sizeof(accelerometer_info));
 
-    prvTmeperature_Fraction = (temperature_info.temperature - (int32_t)temperature_info.temperature) *100 ;
-    prvPresure_Fraction     = (pressure_info.pressure - (int32_t)pressure_info.pressure) *100;
-    prvHumidity_Fraction    = (humidity_info.humidity- (int32_t)humidity_info.humidity) *100;
+    xmessageLength = prvSnprintf( cDataBuffer, echoMAX_DATA_LENGTH,
+    		"{\"Counter\":\"%d\",\"Press\":\"%5.2f\",\"Temp\":\"%5.2f\",\"Hum\":\"%5.2f\","
+    				"\"Gyro_X\":\"%d\",\"Gyro_Y\":\"%d\",\"Gyro_Z\":\"%d\","
+    				"\"Magn_X\":\"%d\",\"Magn_Y\":\"%d\",\"Magn_Z\":\"%d\","
+    				"\"Accel_X\":\"%d\",\"Accel_Y\":\"%d\",\"Accel_Z\":\"%d\","
+    				"\"RSSi\":\"%d dB\"}",
+					xMessageNumber,
+					pressure_info.pressure,
+					temperature_info.temperature,
+					humidity_info.humidity,
+					gyroscope_info.gyroscope.AXIS_X,
+					gyroscope_info.gyroscope.AXIS_Y,
+					gyroscope_info.gyroscope.AXIS_Z,
+					magnetometer_info.magnetometer.AXIS_X,
+					magnetometer_info.magnetometer.AXIS_Y,
+					magnetometer_info.magnetometer.AXIS_Z,
+					accelerometer_info.accelerometer.AXIS_X,
+					accelerometer_info.accelerometer.AXIS_Y,
+					accelerometer_info.accelerometer.AXIS_Z,
+					dc_cellular_rt_info.cs_signal_level_db);
 
-    xmessageLength = snprintf( cDataBuffer, echoMAX_DATA_LENGTH,
-    		"{\"Counter\":\"%d\",\"Press\":\"%i.%2d\",\"Temp\":\"%i.%2d\",\"Hum\":\"%i.%2d\",\"Gyro_X\":\"%d\",\"Gyro_Y\":\"%d\",\"Gyro_Z\":\"%d\",\"Magn_X\":\"%d\",\"Magn_Y\":\"%d\",\"Magn_Z\":\"%d\"}",
-    				prvIteration,
-					(int)pressure_info.pressure,
-					(int) prvPresure_Fraction,
-					(int)temperature_info.temperature,
-					(int) prvTmeperature_Fraction,
-					(int)humidity_info.humidity,
-					(int)prvHumidity_Fraction,
-					(int)gyroscope_info.gyroscope.AXIS_X,
-					(int)gyroscope_info.gyroscope.AXIS_Y,
-					(int)gyroscope_info.gyroscope.AXIS_Z,
-					(int)magnetometer_info.magnetometer.AXIS_X,
-					(int)magnetometer_info.magnetometer.AXIS_Y,
-					(int)magnetometer_info.magnetometer.AXIS_Z);
     /* Setup the publish parameters. */
     strcpy(prvTOPIC_NAME,echoTOPIC_ROOT);
     strcat(prvTOPIC_NAME,echoTOPIC_EXTENTION);
@@ -634,7 +637,7 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
         	configPRINTF( ( "Heap: %d bytes left\r\n", xPortGetFreeHeapSize() ) );
 
             /*  Delay before next publication */
-            vTaskDelay( (const) pdMS_TO_TICKS( 1100UL ));
+            vTaskDelay( xFiveSeconds);
         }
     }
 
