@@ -103,6 +103,9 @@ const char *  echoTOPIC_EXTENTION = ( const char * ) echoCLIENT_ID;
  */
 #define echoACK_STRING         ( ( const char * ) ",\"ACK\":\"ACK\"}" )
 
+#define firstCOMMA				(( const char * ) ",")
+
+#define offsetFirstColon		12
 /**
  * @brief Dimension of the character array buffers used to hold data (strings in
  * this case) that is published to and received from the MQTT broker (in the cloud).
@@ -194,14 +197,13 @@ static MessageBufferHandle_t xEchoMessageBuffer = NULL;
  */
 static MQTTAgentHandle_t xMQTTHandle = NULL;
 
-static dc_cellular_rt_info_t     dc_cellular_rt_info;
+static dc_cellular_rt_info_t     	dc_cellular_rt_info;
 static dc_pressure_rt_info_t        pressure_info;
 static dc_humidity_rt_info_t        humidity_info;
 static dc_temperature_rt_info_t     temperature_info;
 static dc_accelerometer_rt_info_t   accelerometer_info;
 static dc_gyroscope_rt_info_t       gyroscope_info;
 static dc_magnetometer_rt_info_t    magnetometer_info;
-static uint32_t 					prvIteration= 0;
 static uint8_t               		prvTOPIC_NAME[topic_name_size];
 
 
@@ -381,13 +383,13 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
 
     if( xReturned == eMQTTAgentSuccess )
     {
-        configPRINTF( ( "Echo published Message# %d of Length %d\r\n", prvIteration, xmessageLength  ) );
+        configPRINTF( ( "Echo published Message# %d of Length %d\r\n", xMessageNumber, xmessageLength  ) );
         ( void )prvMQTT_Status_Set(MQTT_Connected);
 
     }
     else
     {
-        configPRINTF( ( "ERROR:  Echo failed to publish Message# %d\r\n", prvIteration ) );
+        configPRINTF( ( "ERROR:  Echo failed to publish Message# %d\r\n", xMessageNumber ) );
         ( void )prvMQTT_Status_Set(MQTT_Disconnected);
     }
 
@@ -402,6 +404,10 @@ static void prvMessageEchoingTask( void * pvParameters )
     MQTTAgentReturnCode_t xReturned;
     char cDataBuffer[ echoMAX_DATA_LENGTH];
     size_t xBytesReceived;
+    char * xPosComma;
+    int32_t nbdigits;
+    char xMessageNumber[20];
+    BaseType_t x;
 
     /* Remove compiler warnings about unused parameters. */
     ( void ) pvParameters;
@@ -432,11 +438,28 @@ static void prvMessageEchoingTask( void * pvParameters )
         /* Ensure the ACK can be added without overflowing the buffer. */
         if( xBytesReceived < ( sizeof( cDataBuffer ) - strlen( echoACK_STRING ) - ( size_t ) 1 ) )
         {
-            /* Append ACK to the received message. Note that
-             * strcat appends terminating null character to the
-             * cDataBuffer. */
+            /* Append JSON element ACK to the received message after removing }at the end of the message.
+             * Removed use of strcat as it is using malloc and was corrupting the buffer */
             memcpy( &cDataBuffer[strlen(cDataBuffer)-1],echoACK_STRING,strlen(echoACK_STRING));
             xPublishParameters.ulDataLength = ( uint32_t ) strlen( cDataBuffer );
+
+            /* Message number is the number between "Counter" and the next element of the message */
+
+            memset( xMessageNumber, 0x00, sizeof( xMessageNumber ) );
+            xPosComma = strstr(cDataBuffer, firstCOMMA );
+			if ( xPosComma != NULL )
+			{
+				/* The number of digits for the message is determined by finding the position
+				 * of the 1st colon following the word "Counter" in the JSON message + 1 and
+				 * the position of the 1st comma in the JSON message following the number */
+
+				nbdigits = &xPosComma[0]- &cDataBuffer[0] - (offsetFirstColon+1);
+				for (x=0; x<nbdigits; x++)
+				{
+					xMessageNumber[x] = cDataBuffer[x+offsetFirstColon];
+				}
+				xMessageNumber[x] = '\0';
+			}
 
             /* Publish the ACK message. */
             xReturned = MQTT_AGENT_Publish( xMQTTHandle,
@@ -445,12 +468,12 @@ static void prvMessageEchoingTask( void * pvParameters )
 
             if( xReturned == eMQTTAgentSuccess )
             {
-                configPRINTF( ( "Return ACK from:%s %d\r\n", "Message #", prvIteration ) );
+            	configPRINTF( ( "Return ACK from: Message # %s\r\n", xMessageNumber) );
                 ( void )prvMQTT_Status_Set(MQTT_Connected);
             }
             else
             {
-                configPRINTF( ( "ERROR:  Could not return message # %d with ACK\r\n", prvIteration ) );
+                configPRINTF( ( "ERROR:  Could not return message # %s with ACK\r\n", xMessageNumber ) );
                 ( void )prvMQTT_Status_Set(MQTT_Disconnected);
             }
         }
@@ -458,7 +481,7 @@ static void prvMessageEchoingTask( void * pvParameters )
         {
             /* cDataBuffer is null terminated as the terminating null
              * character was sent from the MQTT callback. */
-            configPRINTF( ( "ERROR:  Buffer is not big enough to return message with ACK: '%s'\r\n", cDataBuffer ) );
+            configPRINTF( ( "ERROR:  Buffer is not big enough to return message with ACK\r\n") );
         }
     }
 }
