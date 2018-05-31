@@ -689,6 +689,7 @@ void vStartMQTTEnduranceDemo( void )
 		memcpy (&prvTOPIC_NAME[strlen(prvTOPIC_NAME)], echoTOPIC_EXTENTION, strlen (echoTOPIC_EXTENTION));
 
 		configPRINTF( ( "Creating MQTT Echo Task...\r\n" ) );
+		configPRINTF( ( "Heap: %d bytes left\r\n", xPortGetFreeHeapSize() ) );
 
 		/* Create the task that publishes messages to the MQTT broker every five
 		 * seconds.  This task, in turn, creates the task that echoes data received
@@ -702,7 +703,8 @@ void vStartMQTTEnduranceDemo( void )
     }
     else
     {
-    	configPRINTF( ( "Please increase the size of prvTOPIC_NAME...\r\n" ) );
+    	configPRINTF( ( "ERROR: Please increase the size of prvTOPIC_NAME...\r\n" ) );
+    	configPRINTF( ( "MQTT echo demo finished.\r\n" ) );
     }
 
 }
