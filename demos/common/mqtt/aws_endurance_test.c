@@ -90,11 +90,6 @@ extern int prvSnprintf (char *str,size_t count,const char *fmt,...);
  */
 #define echoCLIENT_ID          ( ( const uint8_t * ) clientcredentialIOT_THING_NAME )
 
-/**
- * @brief The topic that the MQTT client both subscribes and publishes to.
- */
-const char *  echoTOPIC_ROOT      = "freertos/demos/data/";
-const char *  echoTOPIC_EXTENTION = ( const char * ) echoCLIENT_ID;
 
 /**
  * @brief The string appended to messages that are echoed back to the MQTT broker.
@@ -111,7 +106,7 @@ const char *  echoTOPIC_EXTENTION = ( const char * ) echoCLIENT_ID;
  * this case) that is published to and received from the MQTT broker (in the cloud).
  */
 #define echoMAX_DATA_LENGTH		350
-#define topic_name_size			50
+
 
 /**
  * @brief A block time of 0 simply means "don't block".
@@ -204,7 +199,15 @@ static dc_temperature_rt_info_t     temperature_info;
 static dc_accelerometer_rt_info_t   accelerometer_info;
 static dc_gyroscope_rt_info_t       gyroscope_info;
 static dc_magnetometer_rt_info_t    magnetometer_info;
-static uint8_t               		prvTOPIC_NAME[topic_name_size];
+
+/**
+ * @brief The topic that the MQTT client both subscribes and publishes to.
+ */
+const char *  echoTOPIC_ROOT      = "freertos/demos/data/";
+const char *  echoTOPIC_EXTENTION = ( const char * ) echoCLIENT_ID;
+
+#define topic_name_size			50
+static char               		prvTOPIC_NAME[topic_name_size];
 
 
 static BaseType_t prvCreateClientAndConnectToBroker( void )
@@ -366,11 +369,8 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
 					accelerometer_info.accelerometer.AXIS_Z,
 					dc_cellular_rt_info.cs_signal_level_db);
 
-    /* Setup the publish parameters. */
-    strcpy(prvTOPIC_NAME,echoTOPIC_ROOT);
-    strcat(prvTOPIC_NAME,echoTOPIC_EXTENTION);
     memset( &( xPublishParameters ), 0x00, sizeof( xPublishParameters ) );
-    xPublishParameters.pucTopic = prvTOPIC_NAME;
+    xPublishParameters.pucTopic = (uint8_t *) prvTOPIC_NAME;
     xPublishParameters.pvData = cDataBuffer;
     xPublishParameters.usTopicLength = ( uint16_t ) strlen( ( const char * ) prvTOPIC_NAME );
     xPublishParameters.ulDataLength = ( uint32_t ) strlen( cDataBuffer );
@@ -416,11 +416,8 @@ static void prvMessageEchoingTask( void * pvParameters )
     configASSERT( xMQTTHandle != NULL );
     configASSERT( xEchoMessageBuffer != NULL );
 
-    strcpy(prvTOPIC_NAME,echoTOPIC_ROOT);
-    strcat(prvTOPIC_NAME,echoTOPIC_EXTENTION);
-
     /* Setup the publish parameters. */
-    xPublishParameters.pucTopic = prvTOPIC_NAME;
+    xPublishParameters.pucTopic = (uint8_t *) prvTOPIC_NAME;
     xPublishParameters.usTopicLength = ( uint16_t ) strlen( ( const char * ) prvTOPIC_NAME );
     xPublishParameters.pvData = cDataBuffer;
     xPublishParameters.xQoS = eMQTTQoS1;
@@ -493,10 +490,7 @@ static BaseType_t prvSubscribe( void )
     BaseType_t xReturn;
     MQTTAgentSubscribeParams_t xSubscribeParams;
 
-    /* Setup subscribe parameters to subscribe to echoTOPIC_NAME topic. */
-    strcpy(prvTOPIC_NAME,echoTOPIC_ROOT);
-    strcat(prvTOPIC_NAME,echoTOPIC_EXTENTION);
-    xSubscribeParams.pucTopic = prvTOPIC_NAME;
+    xSubscribeParams.pucTopic = (uint8_t *)prvTOPIC_NAME;
     xSubscribeParams.pvPublishCallbackContext = NULL;
     xSubscribeParams.pxPublishCallback = prvMQTTCallback;
     xSubscribeParams.usTopicLength = ( uint16_t ) strlen( ( const char * ) prvTOPIC_NAME );
@@ -677,7 +671,7 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
 
 void vStartMQTTEnduranceDemo( void )
 {
-    configPRINTF( ( "Creating MQTT Echo Task...\r\n" ) );
+
 
     /* Create the message buffer used to pass strings from the MQTT callback
      * function to the task that echoes the strings back to the broker.  The
@@ -687,15 +681,30 @@ void vStartMQTTEnduranceDemo( void )
     xEchoMessageBuffer = xMessageBufferCreate( ( size_t ) echoMAX_DATA_LENGTH + sizeof( size_t ) );
     configASSERT( xEchoMessageBuffer );
 
-    /* Create the task that publishes messages to the MQTT broker every five
-     * seconds.  This task, in turn, creates the task that echoes data received
-     * from the broker back to the broker. */
-    ( void ) xTaskCreate( prvMQTTConnectAndPublishTask,        		/* The function that implements the demo task. */
-                          "MQTTEcho",                          		/* The name to assign to the task being created. */
-						  democonfigMQTT_ENDURANCE_TASK_STACK_SIZE, /* The size, in WORDS (not bytes), of the stack to allocate for the task being created. */
-                          NULL,                                		/* The task parameter is not being used. */
-						  democonfigMQTT_ENDURANCE_TASK_PRIORITY,   /* The priority at which the task being created will run. */
-                          NULL );                              		/* Not storing the task's handle. */
+    /* Setup the publish topic. */
+    if ( sizeof(prvTOPIC_NAME) > (strlen(echoTOPIC_ROOT)+ strlen (echoTOPIC_EXTENTION)))
+    {
+    	memset( prvTOPIC_NAME , 0x00, sizeof( prvTOPIC_NAME ) );
+    	memcpy (prvTOPIC_NAME, echoTOPIC_ROOT, strlen (echoTOPIC_ROOT));
+		memcpy (&prvTOPIC_NAME[strlen(prvTOPIC_NAME)], echoTOPIC_EXTENTION, strlen (echoTOPIC_EXTENTION));
+
+		configPRINTF( ( "Creating MQTT Echo Task...\r\n" ) );
+
+		/* Create the task that publishes messages to the MQTT broker every five
+		 * seconds.  This task, in turn, creates the task that echoes data received
+		 * from the broker back to the broker. */
+		( void ) xTaskCreate( prvMQTTConnectAndPublishTask,        		/* The function that implements the demo task. */
+							  "MQTTEcho",                          		/* The name to assign to the task being created. */
+							  democonfigMQTT_ENDURANCE_TASK_STACK_SIZE, /* The size, in WORDS (not bytes), of the stack to allocate for the task being created. */
+							  NULL,                                		/* The task parameter is not being used. */
+							  democonfigMQTT_ENDURANCE_TASK_PRIORITY,   /* The priority at which the task being created will run. */
+							  NULL );
+    }
+    else
+    {
+    	configPRINTF( ( "Please increase the size of prvTOPIC_NAME...\r\n" ) );
+    }
+
 }
 /*-----------------------------------------------------------*/
 
