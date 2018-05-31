@@ -104,7 +104,6 @@ LoopCopyDataInit:
 	cmp	r2, r3
 	bcc	CopyDataInit
 	movs	r1, #0
-	ldr	r2, =_sdata2
 	b	LoopCopyDataInit2
 
 CopyDataInit2:

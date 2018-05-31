@@ -176,6 +176,11 @@
 			<locationURI>AWS_IOT_MCU_ROOT/demos/common/logging/aws_logging_task_dynamic_buffers.c</locationURI>
 		</link>
 		<link>
+			<name>application_code/common_demos/source/snprintf.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/common/mqtt/snprintf.c</locationURI>
+		</link>
+		<link>
 			<name>lib/third_party/bg96/BSP</name>
 			<type>2</type>
 			<locationURI>AWS_IOT_MCU_ROOT/lib/third_party/bg96/BSP</locationURI>

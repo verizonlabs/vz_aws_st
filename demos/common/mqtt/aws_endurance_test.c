@@ -81,6 +81,7 @@
 #include "aws_endurance_test.h"
 #include "dc_data.h"
 
+extern int prvSnprintf (char *str,size_t count,const char *fmt,...);
 
 /**
  * @brief MQTT client ID.
@@ -89,25 +90,23 @@
  */
 #define echoCLIENT_ID          ( ( const uint8_t * ) clientcredentialIOT_THING_NAME )
 
-/**
- * @brief The topic that the MQTT client both subscribes and publishes to.
- */
-const char *  echoTOPIC_ROOT      = "freertos/demos/data/";
-const char *  echoTOPIC_EXTENTION = ( const char * ) echoCLIENT_ID;
 
 /**
  * @brief The string appended to messages that are echoed back to the MQTT broker.
  *
  * It is also used to detect if a received message has already been acknowledged.
  */
-#define echoACK_STRING         ( ( const char * ) " ACK" )
+#define echoACK_STRING         ( ( const char * ) ",\"ACK\":\"ACK\"}" )
 
+#define firstCOMMA				(( const char * ) ",")
+
+#define offsetFirstColon		12
 /**
  * @brief Dimension of the character array buffers used to hold data (strings in
  * this case) that is published to and received from the MQTT broker (in the cloud).
  */
 #define echoMAX_DATA_LENGTH		350
-#define topic_name_size			50
+
 
 /**
  * @brief A block time of 0 simply means "don't block".
@@ -193,17 +192,22 @@ static MessageBufferHandle_t xEchoMessageBuffer = NULL;
  */
 static MQTTAgentHandle_t xMQTTHandle = NULL;
 
+static dc_cellular_rt_info_t     	dc_cellular_rt_info;
 static dc_pressure_rt_info_t        pressure_info;
 static dc_humidity_rt_info_t        humidity_info;
 static dc_temperature_rt_info_t     temperature_info;
 static dc_accelerometer_rt_info_t   accelerometer_info;
 static dc_gyroscope_rt_info_t       gyroscope_info;
 static dc_magnetometer_rt_info_t    magnetometer_info;
-static uint32_t 					prvIteration= 0;
-static uint32_t					 	prvTmeperature_Fraction=0;
-static uint32_t					 	prvPresure_Fraction=0;
-static uint32_t					 	prvHumidity_Fraction=0;
-static uint8_t               		prvTOPIC_NAME[topic_name_size];
+
+/**
+ * @brief The topic that the MQTT client both subscribes and publishes to.
+ */
+const char *  echoTOPIC_ROOT      = "freertos/demos/data/";
+const char *  echoTOPIC_EXTENTION = ( const char * ) echoCLIENT_ID;
+
+#define topic_name_size			50
+static char               		prvTOPIC_NAME[topic_name_size];
 
 
 static BaseType_t prvCreateClientAndConnectToBroker( void )
@@ -325,6 +329,7 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
     MQTTAgentPublishParams_t xPublishParameters;
     MQTTAgentReturnCode_t xReturned;
     char cDataBuffer[ echoMAX_DATA_LENGTH ];
+    int xmessageLength;
 
     /* Check this function is not being called before the MQTT client object has
      * been created. */
@@ -334,37 +339,38 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
      * where n is a monotonically increasing number. Note that snprintf appends
      * terminating null character to the cDataBuffer. */
     /*  Reading All data information from the buffer info */
-    prvIteration++;
+
+    dc_com_read (&dc_com_db, DC_COM_CELLULAR, (void*)&dc_cellular_rt_info,sizeof(dc_cellular_rt_info));
     dc_com_read (&dc_com_db, DC_COM_PRESSURE, (void*)&pressure_info, sizeof(pressure_info)); /*  Reading Pressure info */
     dc_com_read (&dc_com_db, DC_COM_TEMPERATURE, (void*)&temperature_info, sizeof(temperature_info));
     dc_com_read (&dc_com_db, DC_COM_HUMIDITY, (void*)&humidity_info, sizeof(humidity_info));
     dc_com_read (&dc_com_db, DC_COM_GYROSCOPE, (void*)&gyroscope_info, sizeof(gyroscope_info));
     dc_com_read (&dc_com_db, DC_COM_MAGNETOMETER, (void*)&magnetometer_info, sizeof(magnetometer_info));
+    dc_com_read (&dc_com_db, DC_COM_ACCELEROMETER, (void*)&accelerometer_info, sizeof(accelerometer_info));
 
-    prvTmeperature_Fraction = (temperature_info.temperature - (int32_t)temperature_info.temperature) *100 ;
-    prvPresure_Fraction     = (pressure_info.pressure - (int32_t)pressure_info.pressure) *100;
-    prvHumidity_Fraction    = (humidity_info.humidity- (int32_t)humidity_info.humidity) *100;
+    xmessageLength = prvSnprintf( cDataBuffer, echoMAX_DATA_LENGTH,
+    		"{\"Counter\":\"%d\",\"Press\":\"%5.2f\",\"Temp\":\"%5.2f\",\"Hum\":\"%5.2f\","
+    				"\"Gyro_X\":\"%d\",\"Gyro_Y\":\"%d\",\"Gyro_Z\":\"%d\","
+    				"\"Magn_X\":\"%d\",\"Magn_Y\":\"%d\",\"Magn_Z\":\"%d\","
+    				"\"Accel_X\":\"%d\",\"Accel_Y\":\"%d\",\"Accel_Z\":\"%d\","
+    				"\"RSSi\":\"%d dB\"}",
+					xMessageNumber,
+					pressure_info.pressure,
+					temperature_info.temperature,
+					humidity_info.humidity,
+					gyroscope_info.gyroscope.AXIS_X,
+					gyroscope_info.gyroscope.AXIS_Y,
+					gyroscope_info.gyroscope.AXIS_Z,
+					magnetometer_info.magnetometer.AXIS_X,
+					magnetometer_info.magnetometer.AXIS_Y,
+					magnetometer_info.magnetometer.AXIS_Z,
+					accelerometer_info.accelerometer.AXIS_X,
+					accelerometer_info.accelerometer.AXIS_Y,
+					accelerometer_info.accelerometer.AXIS_Z,
+					dc_cellular_rt_info.cs_signal_level_db);
 
-    ( void ) snprintf( cDataBuffer, echoMAX_DATA_LENGTH,
-    		"{\"Counter\":\"%d\",\"Press\":\"%i.%2d\",\"Temp\":\"%i.%2d\",\"Hum\":\"%i.%2d\",\"Gyro_X\":\"%d\",\"Gyro_Y\":\"%d\",\"Gyro_Z\":\"%d\",\"Magn_X\":\"%d\",\"Magn_Y\":\"%d\",\"Magn_Z\":\"%d\"}",
-    				prvIteration,
-					(int)pressure_info.pressure,
-					(int) prvPresure_Fraction,
-					(int)temperature_info.temperature,
-					(int) prvTmeperature_Fraction,
-					(int)humidity_info.humidity,
-					(int)prvHumidity_Fraction,
-					(int)gyroscope_info.gyroscope.AXIS_X,
-					(int)gyroscope_info.gyroscope.AXIS_Y,
-					(int)gyroscope_info.gyroscope.AXIS_Z,
-					(int)magnetometer_info.magnetometer.AXIS_X,
-					(int)magnetometer_info.magnetometer.AXIS_Y,
-					(int)magnetometer_info.magnetometer.AXIS_Z);
-    /* Setup the publish parameters. */
-    strcpy(prvTOPIC_NAME,echoTOPIC_ROOT);
-    strcat(prvTOPIC_NAME,echoTOPIC_EXTENTION);
     memset( &( xPublishParameters ), 0x00, sizeof( xPublishParameters ) );
-    xPublishParameters.pucTopic = prvTOPIC_NAME;
+    xPublishParameters.pucTopic = (uint8_t *) prvTOPIC_NAME;
     xPublishParameters.pvData = cDataBuffer;
     xPublishParameters.usTopicLength = ( uint16_t ) strlen( ( const char * ) prvTOPIC_NAME );
     xPublishParameters.ulDataLength = ( uint32_t ) strlen( cDataBuffer );
@@ -377,14 +383,13 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
 
     if( xReturned == eMQTTAgentSuccess )
     {
-        configPRINTF( ( "Echo successfully published  Message# %d\r\n", prvIteration  ) );
-
+        configPRINTF( ( "Echo published Message# %d of Length %d\r\n", xMessageNumber, xmessageLength  ) );
         ( void )prvMQTT_Status_Set(MQTT_Connected);
 
     }
     else
     {
-        configPRINTF( ( "ERROR:  Echo failed to publish Message# %d\r\n", prvIteration ) );
+        configPRINTF( ( "ERROR:  Echo failed to publish Message# %d\r\n", xMessageNumber ) );
         ( void )prvMQTT_Status_Set(MQTT_Disconnected);
     }
 
@@ -399,6 +404,10 @@ static void prvMessageEchoingTask( void * pvParameters )
     MQTTAgentReturnCode_t xReturned;
     char cDataBuffer[ echoMAX_DATA_LENGTH];
     size_t xBytesReceived;
+    char * xPosComma;
+    int32_t nbdigits;
+    char xMessageNumber[20];
+    BaseType_t x;
 
     /* Remove compiler warnings about unused parameters. */
     ( void ) pvParameters;
@@ -407,11 +416,8 @@ static void prvMessageEchoingTask( void * pvParameters )
     configASSERT( xMQTTHandle != NULL );
     configASSERT( xEchoMessageBuffer != NULL );
 
-    strcpy(prvTOPIC_NAME,echoTOPIC_ROOT);
-    strcat(prvTOPIC_NAME,echoTOPIC_EXTENTION);
-
     /* Setup the publish parameters. */
-    xPublishParameters.pucTopic = prvTOPIC_NAME;
+    xPublishParameters.pucTopic = (uint8_t *) prvTOPIC_NAME;
     xPublishParameters.usTopicLength = ( uint16_t ) strlen( ( const char * ) prvTOPIC_NAME );
     xPublishParameters.pvData = cDataBuffer;
     xPublishParameters.xQoS = eMQTTQoS1;
@@ -429,11 +435,28 @@ static void prvMessageEchoingTask( void * pvParameters )
         /* Ensure the ACK can be added without overflowing the buffer. */
         if( xBytesReceived < ( sizeof( cDataBuffer ) - strlen( echoACK_STRING ) - ( size_t ) 1 ) )
         {
-            /* Append ACK to the received message. Note that
-             * strcat appends terminating null character to the
-             * cDataBuffer. */
-            strcat( cDataBuffer, echoACK_STRING );
+            /* Append JSON element ACK to the received message after removing }at the end of the message.
+             * Removed use of strcat as it is using malloc and was corrupting the buffer */
+            memcpy( &cDataBuffer[strlen(cDataBuffer)-1],echoACK_STRING,strlen(echoACK_STRING));
             xPublishParameters.ulDataLength = ( uint32_t ) strlen( cDataBuffer );
+
+            /* Message number is the number between "Counter" and the next element of the message */
+
+            memset( xMessageNumber, 0x00, sizeof( xMessageNumber ) );
+            xPosComma = strstr(cDataBuffer, firstCOMMA );
+			if ( xPosComma != NULL )
+			{
+				/* The number of digits for the message is determined by finding the position
+				 * of the 1st colon following the word "Counter" in the JSON message + 1 and
+				 * the position of the 1st comma in the JSON message following the number */
+
+				nbdigits = &xPosComma[0]- &cDataBuffer[0] - (offsetFirstColon+1);
+				for (x=0; x<nbdigits; x++)
+				{
+					xMessageNumber[x] = cDataBuffer[x+offsetFirstColon];
+				}
+				xMessageNumber[x] = '\0';
+			}
 
             /* Publish the ACK message. */
             xReturned = MQTT_AGENT_Publish( xMQTTHandle,
@@ -442,12 +465,12 @@ static void prvMessageEchoingTask( void * pvParameters )
 
             if( xReturned == eMQTTAgentSuccess )
             {
-                configPRINTF( ( "Return ACK from:%s %d\r\n", "Message #", prvIteration ) );
+            	configPRINTF( ( "Return ACK from: Message # %s\r\n", xMessageNumber) );
                 ( void )prvMQTT_Status_Set(MQTT_Connected);
             }
             else
             {
-                configPRINTF( ( "ERROR:  Could not return message # %d with ACK\r\n", prvIteration ) );
+                configPRINTF( ( "ERROR:  Could not return message # %s with ACK\r\n", xMessageNumber ) );
                 ( void )prvMQTT_Status_Set(MQTT_Disconnected);
             }
         }
@@ -455,7 +478,7 @@ static void prvMessageEchoingTask( void * pvParameters )
         {
             /* cDataBuffer is null terminated as the terminating null
              * character was sent from the MQTT callback. */
-            configPRINTF( ( "ERROR:  Buffer is not big enough to return message with ACK: '%s'\r\n", cDataBuffer ) );
+            configPRINTF( ( "ERROR:  Buffer is not big enough to return message with ACK\r\n") );
         }
     }
 }
@@ -467,10 +490,7 @@ static BaseType_t prvSubscribe( void )
     BaseType_t xReturn;
     MQTTAgentSubscribeParams_t xSubscribeParams;
 
-    /* Setup subscribe parameters to subscribe to echoTOPIC_NAME topic. */
-    strcpy(prvTOPIC_NAME,echoTOPIC_ROOT);
-    strcat(prvTOPIC_NAME,echoTOPIC_EXTENTION);
-    xSubscribeParams.pucTopic = prvTOPIC_NAME;
+    xSubscribeParams.pucTopic = (uint8_t *)prvTOPIC_NAME;
     xSubscribeParams.pvPublishCallbackContext = NULL;
     xSubscribeParams.pxPublishCallback = prvMQTTCallback;
     xSubscribeParams.usTopicLength = ( uint16_t ) strlen( ( const char * ) prvTOPIC_NAME );
@@ -550,7 +570,9 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
 {
     BaseType_t x, xReturned;
     const TickType_t xFiveSeconds = pdMS_TO_TICKS( 5000UL );
-    const BaseType_t xIterations = 3600 * 24;
+
+
+    const BaseType_t xIterations = 3600 * 24 * 100;
     TaskHandle_t xEchoingTask = NULL;
     uint32_t prvIncrement_timer = 0;
 
@@ -620,7 +642,7 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
 				else
 				{
 					configPRINTF( ( "MQTT Agents can't be started.\r\n" ) );
-					 vTaskDelay( xFiveSeconds * 5 );
+					 vTaskDelay( xFiveSeconds * prvIncrement_timer );
 				}
         	}
         	else
@@ -629,10 +651,10 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
 
         	}
 
-        	configPRINTF( ( "Heap: %d bytes left\r\n", xPortGetMinimumEverFreeHeapSize() ) );
+        	configPRINTF( ( "Heap: %d bytes left\r\n", xPortGetFreeHeapSize() ) );
 
-            /* Five seconds delay between publishes. */
-            vTaskDelay( xFiveSeconds * 2);
+            /*  Delay before next publication */
+            vTaskDelay( xFiveSeconds);
         }
     }
 
@@ -649,7 +671,7 @@ static void prvMQTTConnectAndPublishTask( void * pvParameters )
 
 void vStartMQTTEnduranceDemo( void )
 {
-    configPRINTF( ( "Creating MQTT Echo Task...\r\n" ) );
+
 
     /* Create the message buffer used to pass strings from the MQTT callback
      * function to the task that echoes the strings back to the broker.  The
@@ -659,15 +681,32 @@ void vStartMQTTEnduranceDemo( void )
     xEchoMessageBuffer = xMessageBufferCreate( ( size_t ) echoMAX_DATA_LENGTH + sizeof( size_t ) );
     configASSERT( xEchoMessageBuffer );
 
-    /* Create the task that publishes messages to the MQTT broker every five
-     * seconds.  This task, in turn, creates the task that echoes data received
-     * from the broker back to the broker. */
-    ( void ) xTaskCreate( prvMQTTConnectAndPublishTask,        		/* The function that implements the demo task. */
-                          "MQTTEcho",                          		/* The name to assign to the task being created. */
-						  democonfigMQTT_ENDURANCE_TASK_STACK_SIZE, /* The size, in WORDS (not bytes), of the stack to allocate for the task being created. */
-                          NULL,                                		/* The task parameter is not being used. */
-						  democonfigMQTT_ENDURANCE_TASK_PRIORITY,   /* The priority at which the task being created will run. */
-                          NULL );                              		/* Not storing the task's handle. */
+    /* Setup the publish topic. */
+    if ( sizeof(prvTOPIC_NAME) > (strlen(echoTOPIC_ROOT)+ strlen (echoTOPIC_EXTENTION)))
+    {
+    	memset( prvTOPIC_NAME , 0x00, sizeof( prvTOPIC_NAME ) );
+    	memcpy (prvTOPIC_NAME, echoTOPIC_ROOT, strlen (echoTOPIC_ROOT));
+		memcpy (&prvTOPIC_NAME[strlen(prvTOPIC_NAME)], echoTOPIC_EXTENTION, strlen (echoTOPIC_EXTENTION));
+
+		configPRINTF( ( "Creating MQTT Echo Task...\r\n" ) );
+		configPRINTF( ( "Heap: %d bytes left\r\n", xPortGetFreeHeapSize() ) );
+
+		/* Create the task that publishes messages to the MQTT broker every five
+		 * seconds.  This task, in turn, creates the task that echoes data received
+		 * from the broker back to the broker. */
+		( void ) xTaskCreate( prvMQTTConnectAndPublishTask,        		/* The function that implements the demo task. */
+							  "MQTTEcho",                          		/* The name to assign to the task being created. */
+							  democonfigMQTT_ENDURANCE_TASK_STACK_SIZE, /* The size, in WORDS (not bytes), of the stack to allocate for the task being created. */
+							  NULL,                                		/* The task parameter is not being used. */
+							  democonfigMQTT_ENDURANCE_TASK_PRIORITY,   /* The priority at which the task being created will run. */
+							  NULL );
+    }
+    else
+    {
+    	configPRINTF( ( "ERROR: Please increase the size of prvTOPIC_NAME...\r\n" ) );
+    	configPRINTF( ( "MQTT echo demo finished.\r\n" ) );
+    }
+
 }
 /*-----------------------------------------------------------*/
 
