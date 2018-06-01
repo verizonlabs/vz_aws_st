@@ -1,6 +1,25 @@
-/**
-  ******************************************************************************
-  */
+/*
+ * Copyright (C) 2018 pureIntegration. All Rights Reserved
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * https://pureintegration.com
+ */
 
 /* Includes ------------------------------------------------------------------*/
 #include "aws_bg96_modem.h"
@@ -35,44 +54,36 @@ static void BG96_net_up_cb ( dc_com_event_id_t dc_event_id, void* private_gui_da
 
 #define mainLOGGING_MESSAGE_QUEUE_LENGTH    ( 15 )
 
+/**
+ * @brief Initialize the BG96 HAL.
+ *
+ * This function initializes the low level hardware drivers and must be called
+ * before calling any other modem API
+ *
+ */
+
 void BG96_HAL_Init(void)
 {
 
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration----------------------------------------------------------*/
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_UART4_Init();
 
-  /* USER CODE BEGIN 2 */
-
-  /* USER CODE END 2 */
-
-  /* USER CODE BEGIN WHILE */
-
-  // USER CODE END WHILE
-
-  // USER CODE BEGIN 3
-
-  /* USER CODE END 3 */
 
 }
 
+/**
+ * @brief Initialize the BG96 drivers.
+ *
+ * This function initializes the low level drivers and must be called
+ * before calling BG96_Modem_Start
+ *
+ */
+
 void BG96_Modem_Init(void) {
 
-	  /* statical init of components */
+	/* Do not change order */
 
 	  (void)com_init();
 
@@ -94,9 +105,18 @@ void BG96_Modem_Init(void) {
 
 }
 
-/* StartDefaultTask function */
+/**
+ * @brief Starts the BG96 drivers.
+ *
+ * This function starts the low level  drivers and must be called last in the sequence
+ * e.g. after BG96_HAL_Init and BG96_Modem_Init
+ *
+ */
+
 void BG96_Modem_Start ()
 {
+
+	/* Do not change order */
 
 	dc_start();
 
@@ -109,6 +129,14 @@ void BG96_Modem_Start ()
 	radio_mngt_radio_on();
 
 }
+
+/**
+ * @brief Callback function.
+ *
+ * This function is called whenever there is an event on the network interface
+ * manager. Only interested when the modem is up.
+ *
+ */
 
 static void BG96_net_up_cb ( dc_com_event_id_t dc_event_id, void* private_gui_data )
 {
