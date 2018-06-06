@@ -1,39 +1,27 @@
 /**
   ******************************************************************************
-  * @file    Middlewares\ST\at_service\custom\modem_bg96\inc\at_custom_modem_specific.h
+  * @file    Application\at_service\custom\modem_bg96\inc\at_custom_modem_specific.h
   * @author  MCD Application Team
   * @brief   This file defines all the parameters specific to the
   *          BG96 Quectel modem: LTE-cat-M1 or LTE-cat.NB1(=NB-IOT) or GSM
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2018 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
+  * ST Confidential Information released to Verizon under NDA.
   *
   ******************************************************************************
-  */ 
+  */
 
 #ifndef AT_CUSTOM_MODEM_BG96_H
 #define AT_CUSTOM_MODEM_BG96_H
 
 #include "at_core.h"
+#include "at_parser.h"
 #include "at_custom_common.h"
 #include "at_custom_modem.h"
-#include "at_parser.h"
-#include "ipc_common.h"
 #include "cellular_service.h"
 #include "cellular_service_int.h"
+#include "IPC_common.h"
 
 typedef enum
 {
