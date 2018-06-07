@@ -1,30 +1,16 @@
 /**
   ******************************************************************************
-  * @file    Middlewares\ST\radio_service\cellular\inc\cellular_service_task.h
+  * @file    Application\radio_service\cellular\inc\cellular_service_task.h
   * @author  MCD Application Team
-  * @version V0.8
-  * @date    29-June-2017
   * @brief   This file defines all the functions prototypes for
-  *                      cellular service task
+  *          cellular service task
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2018 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
+  * ST Confidential Information released to Verizon under NDA.
   *
   ******************************************************************************
-  */ 
+  */
 
 #ifndef CELLULAR_SERVICE_TASK_H_
 #define CELLULAR_SERVICE_TASK_H_

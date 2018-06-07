@@ -1,27 +1,15 @@
 /**
   ******************************************************************************
-  * @file    Middlewares\ST\at_service\core\src\at_custom_common.c
+  * @file    Application\at_service\core\src\at_custom_common.c
   * @author  MCD Application Team
   * @brief   This file provides common code for devices
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2018 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
+  * ST Confidential Information released to Verizon under NDA.
   *
   ******************************************************************************
-  */ 
+  */
 
 /*
 AT+<X>=?     : TEST COMMAND
@@ -31,19 +19,19 @@ AT+<X>       : EXECUTION COMMAND
 */
 
 /* Includes ------------------------------------------------------------------*/
-#include "plf_config.h"
+#include "string.h"
 #include "at_custom_common.h"
 #include "at_datapack.h"
 #include "at_util.h"
+#include "plf_config.h"
 #include "at_custom_modem_api.h"
-#include "string.h"
 
 #if (USE_TRACE_INTERFACE_ATCUSTOM_COMMON == 1)
 #include "trace_interface.h"
-#define PrintINFO(format, args...) TracePrint(DBG_CHAN_ATCMD, DBL_LVL_P0, "ATCustom:" format "\r\n", ## args)
-#define PrintDBG(format, args...)  TracePrint(DBG_CHAN_ATCMD, DBL_LVL_P1, "ATCustom:" format "\r\n", ## args)
-#define PrintAPI(format, args...)  TracePrint(DBG_CHAN_ATCMD, DBL_LVL_P2, "ATCustom API:" format "\r\n", ## args)
-#define PrintErr(format, args...)  TracePrint(DBG_CHAN_ATCMD, DBL_LVL_ERR, "ATCustom ERROR:" format "\r\n", ## args)
+#define PrintINFO(format, args...) TracePrint(DBG_CHAN_ATCMD, DBL_LVL_P0, "ATCustom:" format "\n\r", ## args)
+#define PrintDBG(format, args...)  TracePrint(DBG_CHAN_ATCMD, DBL_LVL_P1, "ATCustom:" format "\n\r", ## args)
+#define PrintAPI(format, args...)  TracePrint(DBG_CHAN_ATCMD, DBL_LVL_P2, "ATCustom API:" format "\n\r", ## args)
+#define PrintErr(format, args...)  TracePrint(DBG_CHAN_ATCMD, DBL_LVL_ERR, "ATCustom ERROR:" format "\n\r", ## args)
 #elif (USE_PRINTF == 1)
 #define PrintINFO(format, args...)  printf("ATCustom:" format "\r\n", ## args)
 #define PrintDBG(format, args...)   printf("ATCustom:" format "\r\n", ## args)

@@ -1,32 +1,20 @@
 /**
-******************************************************************************
-* File Name          : dc_main.c
+  ******************************************************************************
+  * @file    Application\core\data_cache\Src\dc_main.c
   * @author  MCD Application Team
-* Description        : This file contains data cache initialisation
-******************************************************************************
+  * @brief   This file contains data cache initialisation
+  ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2018 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
+  * ST Confidential Information released to Verizon under NDA.
   *
   ******************************************************************************
-  */ 
+  */
 
-#include "dc_config.h"
-#include "dc_control.h"
 #include "dc_data.h"
+#include "dc_config.h"
 #include "dc_main.h"
+#include "dc_control.h"
 #include <stdio.h>
 #include <string.h>
 

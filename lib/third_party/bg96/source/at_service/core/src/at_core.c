@@ -1,45 +1,33 @@
 /**
   ******************************************************************************
-  * @file    Middlewares\ST\at_service\core\src\at_core.c
+  * @file    Application\at_service\core\src\at_core.c
   * @author  MCD Application Team
   * @brief   This file provides code for AT Core
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2018 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
+  * ST Confidential Information released to Verizon under NDA.
   *
   ******************************************************************************
-  */ 
+  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "error_handler.h"
-#include "plf_config.h"
+#include "string.h"
+#include "ipc_common.h"
 #include "at_core.h"
 #include "at_parser.h"
-#include "ipc_common.h"
-#include "cellular_service_int.h"
-#include "string.h"
+#include "error_handler.h"
+
 #include "plf_config.h"
 #include "plf_stack_size.h"
 
 /* following file added to check SID for DATA suspend/resume cases */
+#include "cellular_service_int.h"
 
 /* specific debug flags */
 #define DBG_REQUEST_DURATION (0)  /* trace the time taken for each request and count disable/enable IT */
 
-#if (USE_TRACE_INTERFACE_ATCORE== 1)
+#if (USE_TRACE_INTERFACE_ATCORE == 1)
 #include "trace_interface.h"
 #define PrintINFO(format, args...) TracePrint(DBG_CHAN_ATCMD, DBL_LVL_P0, "ATCore:" format "\r\n", ## args)
 #define PrintDBG(format, args...)  TracePrint(DBG_CHAN_ATCMD, DBL_LVL_P1, "ATCore:" format "\r\n", ## args)

@@ -1,37 +1,25 @@
 /**
   ******************************************************************************
-  * @file    Middlewares\ST\at_service\core\inc\at_custom_modem.h
+  * @file    Application\at_service\core\inc\at_custom_modem.h
   * @author  MCD Application Team
   * @brief   This file defines all the modem custom types
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2018 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
+  * ST Confidential Information released to Verizon under NDA.
   *
   ******************************************************************************
-  */ 
+  */
 
 #ifndef AT_CUSTOM_MODEM_H_
 #define AT_CUSTOM_MODEM_H_
 
 #include "at_core.h"
-#include "at_custom_common.h"
 #include "at_parser.h"
-#include "ipc_common.h"
+#include "at_custom_common.h"
 #include "cellular_service.h"
 #include "cellular_service_int.h"
+#include "IPC_common.h"
 
 #define MODEM_DEFAULT_TIMEOUT      ((uint32_t) 10000U)
 #define MODEM_PDP_MAX_TYPE_SIZE    ((uint32_t) 8U)

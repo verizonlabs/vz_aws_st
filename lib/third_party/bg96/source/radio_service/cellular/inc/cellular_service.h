@@ -1,33 +1,21 @@
 /**
   ******************************************************************************
-  * @file    Middlewares\ST\radio_service\cellular\inc\cellular_service.h
+  * @file    Application\radio_service\cellular\inc\cellular_service.h
   * @author  MCD Application Team
   * @brief   This file defines functions prototypes for Cellular Service
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2018 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
+  * ST Confidential Information released to Verizon under NDA.
   *
   ******************************************************************************
-  */ 
+  */
 
 #ifndef CELLULAR_SERVICE_H_
 #define CELLULAR_SERVICE_H_
 
-#include "plf_config.h"
 #include "at_core.h"
+#include "plf_config.h"
 
 #define CELLULAR_MAX_SOCKETS     (6)
 
