@@ -2242,23 +2242,23 @@ static at_status_t fCmdBuild_QCFG_BG96(atparser_context_t *p_atp_ctxt, atcustom_
              case _QCFG_nwscanseq:
                 cmd_nb_params = 2;
                 /* param 1 = scanseq */
-                sprintf((char *)&cmd_param1 , "0%x", BG96_SCANSEQ); /* print as hexa but without prefix, need to add 1st digit = 0*/
+                sprintf((char *)&cmd_param1 , "0%lx", BG96_SCANSEQ); /* print as hexa but without prefix, need to add 1st digit = 0*/
                 /* param 2 = effect */
-                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediatly */
+                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediately */
                 break;
              case _QCFG_nwscanmode:
                 cmd_nb_params = 2;
                 /* param 1 = scanmode */
-                sprintf((char *)&cmd_param1 , "%d", BG96_SCANMODE);
+                sprintf((char *)&cmd_param1 , "%ld", BG96_SCANMODE);
                 /* param 2 = effect */
-                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediatly */
+                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediately */
                 break;
              case _QCFG_iotopmode:
                 cmd_nb_params = 2;
                 /* param 1 = iotopmode */
-                sprintf((char *)&cmd_param1 , "%d", BG96_IOTOPMODE);
+                sprintf((char *)&cmd_param1 , "%ld", BG96_IOTOPMODE);
                 /* param 2 = effect */
-                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediatly */
+                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediately */
                 break;
              case _QCFG_roamservice:
                 /* cmd_nb_params = 2; */
@@ -2267,7 +2267,7 @@ static at_status_t fCmdBuild_QCFG_BG96(atparser_context_t *p_atp_ctxt, atcustom_
              case _QCFG_band:
                 cmd_nb_params = 4;
                 /* param 1 = gsmbandval */
-                sprintf((char *)&cmd_param1 , "%x", BG96_BAND_GSM);
+                sprintf((char *)&cmd_param1 , "%lx", BG96_BAND_GSM);
                 /* param 2 = catm1bandval */
                 sprintf((char *)&cmd_param2 , "%llx", BG96_BAND_CAT_M1);
                 /* param 3 = catnb1bandval */
@@ -2638,7 +2638,7 @@ static at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcusto
                 /* client mode: "TCP" of "UDP" */
                 uint8_t _service_type_index = ((p_modem_ctxt->socket_ctxt.socket_info->protocol == CS_TCP_PROTOCOL)? _QIOPENservicetype_TCP_Client : _QIOPENservicetype_UDP_Client);
 
-                sprintf((char *)p_atp_ctxt->current_atcmd.params , "%d,%d,\"%s\",\"%s\",%d,%d,%d",
+                sprintf((char *)p_atp_ctxt->current_atcmd.params , "%d,%ld,\"%s\",\"%s\",%d,%d,%d",
                         pdp_modem_cid,
                         atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->socket_ctxt.socket_info->socket_handle),
                         bg96_array_QIOPEN_service_type[_service_type_index],
@@ -2652,7 +2652,7 @@ static at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcusto
             }
             /*            TODO: QIOPEN for server mode */
 #if 0
-            else if (curSID == ???) for server mode (corresponding to CDS_socket_listen)
+            else if (curSID == "???") for server mode (corresponding to CDS_socket_listen)
             {
                 /* server mode: "TCP LISTENER" of "UDP LISTENER" */
                 uint8_t _service_type_index = ((p_modem_ctxt->socket_ctxt.socket_info->protocol == CS_TCP_PROTOCOL)? _QIOPENservicetype_TCP_Server : _QIOPENservicetype_UDP_Server);
@@ -2696,7 +2696,7 @@ static at_status_t fCmdBuild_QICLOSE_BG96(atparser_context_t *p_atp_ctxt, atcust
             * AT+QICLOSE=connectId>[,<timeout>]
             */
             uint32_t connID = atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->socket_ctxt.socket_info->socket_handle);
-            sprintf((char *)p_atp_ctxt->current_atcmd.params , "%d", connID );
+            sprintf((char *)p_atp_ctxt->current_atcmd.params , "%ld", connID );
         }
         else
         {
@@ -2721,7 +2721,7 @@ static at_status_t fCmdBuild_QISEND_BG96(atparser_context_t *p_atp_ctxt, atcusto
         *
         * DATA are sent using fCmdBuild_QISEND_WRITE_DATA_BG96()
         */
-        sprintf((char *)p_atp_ctxt->current_atcmd.params, "%d,%d",
+        sprintf((char *)p_atp_ctxt->current_atcmd.params, "%ld,%ld",
                 atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->SID_ctxt.socketSendData_struct.socket_handle),
                 p_modem_ctxt->SID_ctxt.socketSendData_struct.buffer_size
                 );
@@ -2763,7 +2763,7 @@ static at_status_t fCmdBuild_QIRD_BG96(atparser_context_t *p_atp_ctxt, atcustom_
         if (BG96_ctxt.socket_ctxt.socket_receive_state == SocketRcvState_RequestSize)
         {
             /* requesting socket data size (set length = 0) */
-            sprintf((char *)p_atp_ctxt->current_atcmd.params, "%d,0",
+            sprintf((char *)p_atp_ctxt->current_atcmd.params, "%ld,0",
                     atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->SID_ctxt.socketSendData_struct.socket_handle) );
         }
         else if (BG96_ctxt.socket_ctxt.socket_receive_state == SocketRcvState_RequestData_Header)
@@ -2777,7 +2777,7 @@ static at_status_t fCmdBuild_QIRD_BG96(atparser_context_t *p_atp_ctxt, atcustom_
 #endif /* USE_C2C_CS_ADAPT */
 
             /* requesting socket data with correct size */
-            sprintf((char *)p_atp_ctxt->current_atcmd.params, "%d,%d",
+            sprintf((char *)p_atp_ctxt->current_atcmd.params, "%ld,%ld",
                     atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->SID_ctxt.socketSendData_struct.socket_handle),
                     requested_data_size );
 
@@ -2807,7 +2807,7 @@ static at_status_t fCmdBuild_QISTATE_BG96(atparser_context_t *p_atp_ctxt, atcust
         * <query_type> = 1
         */
 
-        sprintf((char *)p_atp_ctxt->current_atcmd.params, "1,%d",
+        sprintf((char *)p_atp_ctxt->current_atcmd.params, "1,%ld",
                 atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->SID_ctxt.socketSendData_struct.socket_handle) );
     }
 
