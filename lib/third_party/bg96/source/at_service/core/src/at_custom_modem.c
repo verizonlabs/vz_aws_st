@@ -648,7 +648,7 @@ AT_CHAR_t* atcm_get_CmdStr(atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_
     /* check if this is the invalid cmd id*/
     if (cmd_id == _AT_INVALID)
     {
-        return ("");
+        return ((AT_CHAR_t *)"");
     }
 
     /* search in LUT the cmd ID */
@@ -662,7 +662,7 @@ AT_CHAR_t* atcm_get_CmdStr(atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_
 
     /* should not fall here - return default value */
     PrintErr("INVALID CMD ID %d(CmdStr)", cmd_id);
-    return ("");
+    return ((AT_CHAR_t *)"");
 }
 
 /**
@@ -758,7 +758,7 @@ AT_CHAR_t* atcm_get_PDPtypeStr(CS_PDPtype_t pdp_type)
     }
 
     /* string no found, return empty string */
-    return("");
+    return((AT_CHAR_t *)"");
 }
 
 /* --------------------------------------------------------------------------------------------------------- */
@@ -2543,7 +2543,7 @@ at_status_t fCmdBuild_IPR(atparser_context_t *p_atp_ctxt, atcustom_modem_context
     if (p_atp_ctxt->current_atcmd.type == ATTYPE_WRITE_CMD)
     {
         /* set baud rate */
-        sprintf((char *)p_atp_ctxt->current_atcmd.params , "%d", p_modem_ctxt->CMD_ctxt.baud_rate);
+        sprintf((char *)p_atp_ctxt->current_atcmd.params , "%ld", p_modem_ctxt->CMD_ctxt.baud_rate);
     }
     return (retval);
 }
