@@ -614,6 +614,10 @@ uint8_t ATCustom_BG96_checkEndOfMsgCallback(uint8_t rxChar)
                     }
                     break;
                 }
+
+             default:
+            	 /* No matching case */
+            	 break;
             }
         }
     }
@@ -2408,7 +2412,7 @@ static at_status_t fCmdBuild_CPSMS_BG96(atparser_context_t *p_atp_ctxt, atcustom
         Requested_Active-Time:
 
         exple:
-        AT+CPSMS=1,,,”00000100”,”00001111”
+        AT+CPSMS=1,,,?00000100?,?00001111?
         Set the requested T3412 value to 40 minutes, and set the requested T3324 value to 30 seconds
         */
 #if (BG96_ENABLE_PSM == 1)
@@ -2440,7 +2444,7 @@ static at_status_t fCmdBuild_CEDRXS_BG96(atparser_context_t *p_atp_ctxt, atcusto
         Requested_eDRX_value>:
 
         exple:
-        AT+CEDRX=1,5,”0000”
+        AT+CEDRX=1,5,?0000?
         Set the requested e-I-DRX value to 5.12 second
         */
 #if (BG96_ENABLE_E_I_DRX == 1)
@@ -3170,6 +3174,9 @@ static at_action_rsp_t fRspAnalyze_QCFG_BG96(atparser_context_t *p_atp_ctxt, atc
             bg96_mode_and_bands_config.gsm_bands = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             /* display_decoded_GSM_bands(bg96_mode_and_bands_config.gsm_bands); */
             break;
+         default:
+        	 /* No Matching Case */
+        	break;
         }
     }
     else if (element_infos->param_rank == 4)
@@ -3180,6 +3187,9 @@ static at_action_rsp_t fRspAnalyze_QCFG_BG96(atparser_context_t *p_atp_ctxt, atc
             bg96_mode_and_bands_config.CatM1_bands = ATutil_convertStringToInt64(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             /* display_decoded_CatM1_bands(bg96_mode_and_bands_config.CatM1_bands); */
             break;
+         default:
+        	/* No Matching Case */
+        	break;
         }
     }
     else if (element_infos->param_rank == 5)
@@ -3190,6 +3200,9 @@ static at_action_rsp_t fRspAnalyze_QCFG_BG96(atparser_context_t *p_atp_ctxt, atc
             bg96_mode_and_bands_config.CatNB1_bands = ATutil_convertStringToInt64(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             /* display_decoded_CatNB1_bands(bg96_mode_and_bands_config.CatNB1_bands); */
             break;
+         default:
+        	 /* No Matching Case */
+        	break;
         }
     }
 
@@ -3642,7 +3655,7 @@ static at_action_rsp_t fRspAnalyze_QISTATE_BG96(atparser_context_t *p_atp_ctxt, 
     *
     * where:
     *
-    * exple: +QISTATE: 0,“TCP”,“220.180.239.201”,8705,65514,2,1,0,0,“usbmodem”
+    * exple: +QISTATE: 0,?TCP?,?220.180.239.201?,8705,65514,2,1,0,0,?usbmodem?
     */
 
     if (element_infos->param_rank == 2)
