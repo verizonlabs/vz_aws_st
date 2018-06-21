@@ -62,12 +62,14 @@ AT+<X>       : EXECUTION COMMAND
 #define PrintAPI(format, args...)   vLoggingPrintf("BG96 API:" format "\r\n", ## args)
 #define PrintErr(format, args...)   vLoggingPrintf("BG96 ERROR:" format "\r\n", ## args)
 #define PrintBuf(format, args...)   do {} while(0) /* Cannot print a buffer using vLoggingPrintf */
+#define IGNORE(x) do {} while(0)
 #else
 #define PrintINFO(format, args...)  do {} while(0)
 #define PrintDBG(format, args...)   do {} while(0)
 #define PrintAPI(format, args...)   do {} while(0)
 #define PrintErr(format, args...)   do {} while(0)
 #define PrintBuf(format, args...)   do {} while(0)
+#define IGNORE(x) ((void)(x))
 #endif
 
 /* ###########################  START CUSTOMIZATION PART  ########################### */
@@ -3056,6 +3058,8 @@ static at_action_rsp_t fRspAnalyze_QIACT_BG96(atparser_context_t *p_atp_ctxt, at
             /* analyze <context_type> */
             uint32_t context_type = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintDBG("+QIACT context_type=%d", context_type);
+            /* Avoid Compiler Warning */
+            IGNORE(context_type);
         }
         else if (element_infos->param_rank == 5)
         {
@@ -3400,6 +3404,8 @@ static at_action_rsp_t fRspAnalyze_QIURC_BG96(atparser_context_t *p_atp_ctxt, at
             /* <contextID> */
             contextID = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintDBG("+QIURC pdpdeact for contextID=%d", contextID);
+            /* Avoid Compiler Warning */
+            IGNORE(contextID);
             /* last param */
             retval = ATACTION_RSP_URC_FORWARDED;
             break;
@@ -3458,6 +3464,8 @@ static at_action_rsp_t fRspAnalyze_QIURC_BG96(atparser_context_t *p_atp_ctxt, at
             /* <serverID> */
             serverID = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintDBG("+QIURC incoming for serverID=%d", serverID);
+            /* Avoid Compiler Warning */
+            IGNORE(serverID);
             break;
 
          case _QIURC_dnsgip:
@@ -3530,6 +3538,8 @@ static at_action_rsp_t fRspAnalyze_QIURC_BG96(atparser_context_t *p_atp_ctxt, at
             /* <remote_port> */
             remote_port = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintDBG("+QIURC incoming for remote_port=%d", remote_port);
+            /* Avoid Compiler Warning */
+            IGNORE(remote_port);
             /* last param */
             retval = ATACTION_RSP_URC_FORWARDED;
             break;
@@ -3579,12 +3589,16 @@ static at_action_rsp_t fRspAnalyze_QIRD_BG96(atparser_context_t *p_atp_ctxt, atc
             /* <total_receive_length> */
             uint32_t buff_in = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintINFO("+QIRD: total_receive_length = %d", buff_in);
+            /* Avoid Compiler Warning */
+            IGNORE(buff_in);
         }
         else if (element_infos->param_rank == 3)
         {
             /* <have_read_length> */
             uint32_t buff_in = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintINFO("+QIRD: have_read_length = %d", buff_in);
+            /* Avoid Compiler Warning */
+            IGNORE(buff_in);
         }
         else if (element_infos->param_rank == 4)
         {
@@ -3603,6 +3617,8 @@ static at_action_rsp_t fRspAnalyze_QIRD_BG96(atparser_context_t *p_atp_ctxt, atc
             /* <read_actual_length> */
             uint32_t buff_in = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintDBG("+QIRD: received data size = %d", buff_in);
+            /* Avoid Compiler Warning */
+            IGNORE(buff_in);
             /* NOTE !!! the size is purely informative in current implementation
             *  indeed, due to real time constraints, the socket data header is analyzed directly in ATCustom_BG96_checkEndOfMsgCallback()
             */
@@ -3727,24 +3743,32 @@ static at_action_rsp_t fRspAnalyze_QISTATE_BG96(atparser_context_t *p_atp_ctxt, 
         /*<socket_state> */
         uint32_t sockState = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
         PrintDBG("+QISTATE: <socket_state>=%d", sockState);
+        /* Avoid Compiler Warning */
+        IGNORE(sockState);
     }
     else if (element_infos->param_rank == 8)
     {
         /* <contextID> */
         uint32_t contextID = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
         PrintDBG("+QISTATE: <contextID>=%d", contextID);
+        /* Avoid Compiler Warning */
+        IGNORE(contextID);
     }
     else if (element_infos->param_rank == 9)
     {
         /* <serverID> */
         uint32_t serverID = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
         PrintDBG("+QISTATE: <serverID>=%d", serverID);
+        /* Avoid Compiler Warning */
+        IGNORE(serverID);
     }
     else if (element_infos->param_rank == 9)
     {
         /* <access_mode> */
         uint32_t access_mode = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
         PrintDBG("+QISTATE: <access_mode>=%d", access_mode);
+        /* Avoid Compiler Warning */
+        IGNORE(access_mode);
     }
     else if (element_infos->param_rank == 9)
     {
