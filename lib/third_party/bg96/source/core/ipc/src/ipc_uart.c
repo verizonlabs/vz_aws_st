@@ -37,10 +37,12 @@ const osSemaphoreDef_t os_semaphore_def_##name##index = { 0 }
 #define PrintINFO(format, args...)  vLoggingPrintf("IPC:" format "\r\n", ## args)
 #define PrintDBG(format, args...)   vLoggingPrintf("IPC:" format "\r\n", ## args)
 #define PrintErr(format, args...)   vLoggingPrintf("IPC ERROR:" format "\r\n", ## args)
+#define IGNORE(x) do {} while(0)
 #else
 #define PrintINFO(format, args...)  do {} while(0)
 #define PrintDBG(format, args...)   do {} while(0)
 #define PrintErr(format, args...)   do {} while(0)
+#define IGNORE(x) ((void)(x))
 #endif
 
 /* Private functions prototypes ----------------------------------------------*/
@@ -555,6 +557,8 @@ void IPC_dump_RX_queue_uart(IPC_Handle_t *hipc, uint8_t readable)
         /* should not happen... */
         uint16_t core_msg_index = (dump_index + IPC_RXMSG_HEADER_SIZE) % IPC_RXBUF_MAXSIZE;
         PrintINFO(" ### Last msg is complete, size=%d, data pos=%d: ", header.size,core_msg_index);
+        /* Avoid Compiler Warning */
+        IGNORE(core_msg_index);
         RXFIFO_print_data(hipc, (dump_index + IPC_RXMSG_HEADER_SIZE), first_uncomplete_size, readable);
     }
     else
