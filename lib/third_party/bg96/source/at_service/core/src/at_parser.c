@@ -172,7 +172,7 @@ at_action_send_t  ATParser_get_ATcmd(at_context_t *p_at_ctxt,
     {
         /* no command to send */
         PrintDBG("no command to send");
-        sprintf((char *)p_ATcmdBuf, "");
+        sprintf((char *)p_ATcmdBuf, "%s", "");
         *p_ATcmdSize = 0;
     }
     else
