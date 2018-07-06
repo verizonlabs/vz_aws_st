@@ -25,7 +25,7 @@ static const char clientcredentialCLIENT_CERTIFICATE_PEM[] = "Paste client certi
  * "-----END CERTIFICATE-----";
  */
 
-static const char * const clientcredentialJITR_DEVICE_CERTIFICATE_AUTHORITY_PEM = NULL;
+static const char *clientcredentialJITR_DEVICE_CERTIFICATE_AUTHORITY_PEM __attribute__((used)) = NULL;
 
 /*
  * PEM-encoded client private key.
@@ -36,3 +36,4 @@ static const char * const clientcredentialJITR_DEVICE_CERTIFICATE_AUTHORITY_PEM 
  * "-----END RSA PRIVATE KEY-----";
  */
 static const char clientcredentialCLIENT_PRIVATE_KEY_PEM[] = "Paste client private key here.";
+
