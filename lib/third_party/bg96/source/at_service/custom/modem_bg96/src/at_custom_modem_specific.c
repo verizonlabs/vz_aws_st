@@ -62,12 +62,14 @@ AT+<X>       : EXECUTION COMMAND
 #define PrintAPI(format, args...)   vLoggingPrintf("BG96 API:" format "\r\n", ## args)
 #define PrintErr(format, args...)   vLoggingPrintf("BG96 ERROR:" format "\r\n", ## args)
 #define PrintBuf(format, args...)   do {} while(0) /* Cannot print a buffer using vLoggingPrintf */
+#define IGNORE(x) do {} while(0)
 #else
 #define PrintINFO(format, args...)  do {} while(0)
 #define PrintDBG(format, args...)   do {} while(0)
 #define PrintAPI(format, args...)   do {} while(0)
 #define PrintErr(format, args...)   do {} while(0)
 #define PrintBuf(format, args...)   do {} while(0)
+#define IGNORE(x) ((void)(x))
 #endif
 
 /* ###########################  START CUSTOMIZATION PART  ########################### */
@@ -614,6 +616,10 @@ uint8_t ATCustom_BG96_checkEndOfMsgCallback(uint8_t rxChar)
                     }
                     break;
                 }
+
+             default:
+            	 /* No matching case */
+            	 break;
             }
         }
     }
@@ -2238,23 +2244,23 @@ static at_status_t fCmdBuild_QCFG_BG96(atparser_context_t *p_atp_ctxt, atcustom_
              case _QCFG_nwscanseq:
                 cmd_nb_params = 2;
                 /* param 1 = scanseq */
-                sprintf((char *)&cmd_param1 , "0%x", BG96_SCANSEQ); /* print as hexa but without prefix, need to add 1st digit = 0*/
+                sprintf((char *)&cmd_param1 , "0%lx", BG96_SCANSEQ); /* print as hexa but without prefix, need to add 1st digit = 0*/
                 /* param 2 = effect */
-                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediatly */
+                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediately */
                 break;
              case _QCFG_nwscanmode:
                 cmd_nb_params = 2;
                 /* param 1 = scanmode */
-                sprintf((char *)&cmd_param1 , "%d", BG96_SCANMODE);
+                sprintf((char *)&cmd_param1 , "%ld", BG96_SCANMODE);
                 /* param 2 = effect */
-                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediatly */
+                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediately */
                 break;
              case _QCFG_iotopmode:
                 cmd_nb_params = 2;
                 /* param 1 = iotopmode */
-                sprintf((char *)&cmd_param1 , "%d", BG96_IOTOPMODE);
+                sprintf((char *)&cmd_param1 , "%ld", BG96_IOTOPMODE);
                 /* param 2 = effect */
-                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediatly */
+                sprintf((char *)&cmd_param2 , "%d", 1); /* 1 means take effect immediately */
                 break;
              case _QCFG_roamservice:
                 /* cmd_nb_params = 2; */
@@ -2263,7 +2269,7 @@ static at_status_t fCmdBuild_QCFG_BG96(atparser_context_t *p_atp_ctxt, atcustom_
              case _QCFG_band:
                 cmd_nb_params = 4;
                 /* param 1 = gsmbandval */
-                sprintf((char *)&cmd_param1 , "%x", BG96_BAND_GSM);
+                sprintf((char *)&cmd_param1 , "%lx", BG96_BAND_GSM);
                 /* param 2 = catm1bandval */
                 sprintf((char *)&cmd_param2 , "%llx", BG96_BAND_CAT_M1);
                 /* param 3 = catnb1bandval */
@@ -2408,7 +2414,7 @@ static at_status_t fCmdBuild_CPSMS_BG96(atparser_context_t *p_atp_ctxt, atcustom
         Requested_Active-Time:
 
         exple:
-        AT+CPSMS=1,,,”00000100”,”00001111”
+        AT+CPSMS=1,,,?00000100?,?00001111?
         Set the requested T3412 value to 40 minutes, and set the requested T3324 value to 30 seconds
         */
 #if (BG96_ENABLE_PSM == 1)
@@ -2440,7 +2446,7 @@ static at_status_t fCmdBuild_CEDRXS_BG96(atparser_context_t *p_atp_ctxt, atcusto
         Requested_eDRX_value>:
 
         exple:
-        AT+CEDRX=1,5,”0000”
+        AT+CEDRX=1,5,?0000?
         Set the requested e-I-DRX value to 5.12 second
         */
 #if (BG96_ENABLE_E_I_DRX == 1)
@@ -2634,7 +2640,7 @@ static at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcusto
                 /* client mode: "TCP" of "UDP" */
                 uint8_t _service_type_index = ((p_modem_ctxt->socket_ctxt.socket_info->protocol == CS_TCP_PROTOCOL)? _QIOPENservicetype_TCP_Client : _QIOPENservicetype_UDP_Client);
 
-                sprintf((char *)p_atp_ctxt->current_atcmd.params , "%d,%d,\"%s\",\"%s\",%d,%d,%d",
+                sprintf((char *)p_atp_ctxt->current_atcmd.params , "%d,%ld,\"%s\",\"%s\",%d,%d,%d",
                         pdp_modem_cid,
                         atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->socket_ctxt.socket_info->socket_handle),
                         bg96_array_QIOPEN_service_type[_service_type_index],
@@ -2648,7 +2654,7 @@ static at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcusto
             }
             /*            TODO: QIOPEN for server mode */
 #if 0
-            else if (curSID == ???) for server mode (corresponding to CDS_socket_listen)
+            else if (curSID == "???") for server mode (corresponding to CDS_socket_listen)
             {
                 /* server mode: "TCP LISTENER" of "UDP LISTENER" */
                 uint8_t _service_type_index = ((p_modem_ctxt->socket_ctxt.socket_info->protocol == CS_TCP_PROTOCOL)? _QIOPENservicetype_TCP_Server : _QIOPENservicetype_UDP_Server);
@@ -2692,7 +2698,7 @@ static at_status_t fCmdBuild_QICLOSE_BG96(atparser_context_t *p_atp_ctxt, atcust
             * AT+QICLOSE=connectId>[,<timeout>]
             */
             uint32_t connID = atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->socket_ctxt.socket_info->socket_handle);
-            sprintf((char *)p_atp_ctxt->current_atcmd.params , "%d", connID );
+            sprintf((char *)p_atp_ctxt->current_atcmd.params , "%ld", connID );
         }
         else
         {
@@ -2717,7 +2723,7 @@ static at_status_t fCmdBuild_QISEND_BG96(atparser_context_t *p_atp_ctxt, atcusto
         *
         * DATA are sent using fCmdBuild_QISEND_WRITE_DATA_BG96()
         */
-        sprintf((char *)p_atp_ctxt->current_atcmd.params, "%d,%d",
+        sprintf((char *)p_atp_ctxt->current_atcmd.params, "%ld,%ld",
                 atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->SID_ctxt.socketSendData_struct.socket_handle),
                 p_modem_ctxt->SID_ctxt.socketSendData_struct.buffer_size
                 );
@@ -2759,7 +2765,7 @@ static at_status_t fCmdBuild_QIRD_BG96(atparser_context_t *p_atp_ctxt, atcustom_
         if (BG96_ctxt.socket_ctxt.socket_receive_state == SocketRcvState_RequestSize)
         {
             /* requesting socket data size (set length = 0) */
-            sprintf((char *)p_atp_ctxt->current_atcmd.params, "%d,0",
+            sprintf((char *)p_atp_ctxt->current_atcmd.params, "%ld,0",
                     atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->SID_ctxt.socketSendData_struct.socket_handle) );
         }
         else if (BG96_ctxt.socket_ctxt.socket_receive_state == SocketRcvState_RequestData_Header)
@@ -2773,7 +2779,7 @@ static at_status_t fCmdBuild_QIRD_BG96(atparser_context_t *p_atp_ctxt, atcustom_
 #endif /* USE_C2C_CS_ADAPT */
 
             /* requesting socket data with correct size */
-            sprintf((char *)p_atp_ctxt->current_atcmd.params, "%d,%d",
+            sprintf((char *)p_atp_ctxt->current_atcmd.params, "%ld,%ld",
                     atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->SID_ctxt.socketSendData_struct.socket_handle),
                     requested_data_size );
 
@@ -2803,7 +2809,7 @@ static at_status_t fCmdBuild_QISTATE_BG96(atparser_context_t *p_atp_ctxt, atcust
         * <query_type> = 1
         */
 
-        sprintf((char *)p_atp_ctxt->current_atcmd.params, "1,%d",
+        sprintf((char *)p_atp_ctxt->current_atcmd.params, "1,%ld",
                 atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->SID_ctxt.socketSendData_struct.socket_handle) );
     }
 
@@ -3052,6 +3058,8 @@ static at_action_rsp_t fRspAnalyze_QIACT_BG96(atparser_context_t *p_atp_ctxt, at
             /* analyze <context_type> */
             uint32_t context_type = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintDBG("+QIACT context_type=%d", context_type);
+            /* Avoid Compiler Warning */
+            IGNORE(context_type);
         }
         else if (element_infos->param_rank == 5)
         {
@@ -3170,6 +3178,9 @@ static at_action_rsp_t fRspAnalyze_QCFG_BG96(atparser_context_t *p_atp_ctxt, atc
             bg96_mode_and_bands_config.gsm_bands = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             /* display_decoded_GSM_bands(bg96_mode_and_bands_config.gsm_bands); */
             break;
+         default:
+        	 /* No Matching Case */
+        	break;
         }
     }
     else if (element_infos->param_rank == 4)
@@ -3180,6 +3191,9 @@ static at_action_rsp_t fRspAnalyze_QCFG_BG96(atparser_context_t *p_atp_ctxt, atc
             bg96_mode_and_bands_config.CatM1_bands = ATutil_convertStringToInt64(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             /* display_decoded_CatM1_bands(bg96_mode_and_bands_config.CatM1_bands); */
             break;
+         default:
+        	/* No Matching Case */
+        	break;
         }
     }
     else if (element_infos->param_rank == 5)
@@ -3190,6 +3204,9 @@ static at_action_rsp_t fRspAnalyze_QCFG_BG96(atparser_context_t *p_atp_ctxt, atc
             bg96_mode_and_bands_config.CatNB1_bands = ATutil_convertStringToInt64(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             /* display_decoded_CatNB1_bands(bg96_mode_and_bands_config.CatNB1_bands); */
             break;
+         default:
+        	 /* No Matching Case */
+        	break;
         }
     }
 
@@ -3387,6 +3404,8 @@ static at_action_rsp_t fRspAnalyze_QIURC_BG96(atparser_context_t *p_atp_ctxt, at
             /* <contextID> */
             contextID = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintDBG("+QIURC pdpdeact for contextID=%d", contextID);
+            /* Avoid Compiler Warning */
+            IGNORE(contextID);
             /* last param */
             retval = ATACTION_RSP_URC_FORWARDED;
             break;
@@ -3445,6 +3464,8 @@ static at_action_rsp_t fRspAnalyze_QIURC_BG96(atparser_context_t *p_atp_ctxt, at
             /* <serverID> */
             serverID = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintDBG("+QIURC incoming for serverID=%d", serverID);
+            /* Avoid Compiler Warning */
+            IGNORE(serverID);
             break;
 
          case _QIURC_dnsgip:
@@ -3517,6 +3538,8 @@ static at_action_rsp_t fRspAnalyze_QIURC_BG96(atparser_context_t *p_atp_ctxt, at
             /* <remote_port> */
             remote_port = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintDBG("+QIURC incoming for remote_port=%d", remote_port);
+            /* Avoid Compiler Warning */
+            IGNORE(remote_port);
             /* last param */
             retval = ATACTION_RSP_URC_FORWARDED;
             break;
@@ -3566,12 +3589,16 @@ static at_action_rsp_t fRspAnalyze_QIRD_BG96(atparser_context_t *p_atp_ctxt, atc
             /* <total_receive_length> */
             uint32_t buff_in = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintINFO("+QIRD: total_receive_length = %d", buff_in);
+            /* Avoid Compiler Warning */
+            IGNORE(buff_in);
         }
         else if (element_infos->param_rank == 3)
         {
             /* <have_read_length> */
             uint32_t buff_in = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintINFO("+QIRD: have_read_length = %d", buff_in);
+            /* Avoid Compiler Warning */
+            IGNORE(buff_in);
         }
         else if (element_infos->param_rank == 4)
         {
@@ -3590,6 +3617,8 @@ static at_action_rsp_t fRspAnalyze_QIRD_BG96(atparser_context_t *p_atp_ctxt, atc
             /* <read_actual_length> */
             uint32_t buff_in = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
             PrintDBG("+QIRD: received data size = %d", buff_in);
+            /* Avoid Compiler Warning */
+            IGNORE(buff_in);
             /* NOTE !!! the size is purely informative in current implementation
             *  indeed, due to real time constraints, the socket data header is analyzed directly in ATCustom_BG96_checkEndOfMsgCallback()
             */
@@ -3642,7 +3671,7 @@ static at_action_rsp_t fRspAnalyze_QISTATE_BG96(atparser_context_t *p_atp_ctxt, 
     *
     * where:
     *
-    * exple: +QISTATE: 0,“TCP”,“220.180.239.201”,8705,65514,2,1,0,0,“usbmodem”
+    * exple: +QISTATE: 0,?TCP?,?220.180.239.201?,8705,65514,2,1,0,0,?usbmodem?
     */
 
     if (element_infos->param_rank == 2)
@@ -3714,24 +3743,32 @@ static at_action_rsp_t fRspAnalyze_QISTATE_BG96(atparser_context_t *p_atp_ctxt, 
         /*<socket_state> */
         uint32_t sockState = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
         PrintDBG("+QISTATE: <socket_state>=%d", sockState);
+        /* Avoid Compiler Warning */
+        IGNORE(sockState);
     }
     else if (element_infos->param_rank == 8)
     {
         /* <contextID> */
         uint32_t contextID = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
         PrintDBG("+QISTATE: <contextID>=%d", contextID);
+        /* Avoid Compiler Warning */
+        IGNORE(contextID);
     }
     else if (element_infos->param_rank == 9)
     {
         /* <serverID> */
         uint32_t serverID = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
         PrintDBG("+QISTATE: <serverID>=%d", serverID);
+        /* Avoid Compiler Warning */
+        IGNORE(serverID);
     }
     else if (element_infos->param_rank == 9)
     {
         /* <access_mode> */
         uint32_t access_mode = ATutil_convertStringToInt(&p_msg_in->buffer[element_infos->str_start_idx], element_infos->str_size);
         PrintDBG("+QISTATE: <access_mode>=%d", access_mode);
+        /* Avoid Compiler Warning */
+        IGNORE(access_mode);
     }
     else if (element_infos->param_rank == 9)
     {

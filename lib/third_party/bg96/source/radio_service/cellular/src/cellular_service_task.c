@@ -1104,8 +1104,9 @@ static void CST_modem_define_pdn(void)
 
     /* common user name and password */
     memset((void*)&pdn_conf, 0, sizeof(CS_PDN_configuration_t));
-    memcpy((void*)pdn_conf.username, NULL, 0);
-    memcpy((void*)pdn_conf.password, NULL, 0);
+    void *temp = NULL;
+    memcpy((void*)pdn_conf.username, temp, 0);
+    memcpy((void*)pdn_conf.password, temp, 0);
 
     /* exemple for CS_PDN_USER_CONFIG_1 with access point name =  "PDN CONFIG 1" */
     cs_status = osCDS_define_pdn(CST_cellular_params.CID, (char*)CST_cellular_params.APN, &pdn_conf);

@@ -26,9 +26,11 @@
 #elif (USE_CONFIGPRINTF_ERROR_HANDLER == 1)
 #define PrintINFO(format, args...)  vLoggingPrintf("EH:" format "\r\n", ## args)
 #define PrintDBG(format, args...)   vLoggingPrintf("EH:" format "\r\n", ## args)
+#define IGNORE(x) do {} while(0)
 #else
 #define PrintINFO(format, args...)  do {} while(0)
 #define PrintDBG(format, args...)   do {} while(0)
+#define IGNORE(x) ((void)(x))
 #endif
 
 #define MAX_ERROR_ENTRIES (10)     /* log only last MAX_ERROR_ENTRIES errors */
@@ -114,5 +116,8 @@ void ERROR_Dump_Last(void)
                   errors_table[previous_index].channel,
                   errors_table[previous_index].errorId,
                   errors_table[previous_index].gravity );
+
+        /* Avoid Compiler Warning */
+        IGNORE(previous_index);
     }
 }
