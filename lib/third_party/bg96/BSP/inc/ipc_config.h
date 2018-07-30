@@ -6,14 +6,20 @@
   ******************************************************************************
   * @attention
   *
-  * ST Confidential Information released to Verizon under NDA.
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under Ultimate Liberty license
+  * SLA0044, the "License"; You may not use this file except in compliance with
+  * the License. You may obtain a copy of the License at:
+  *                      http://www.st.com/SLA0044
   *
   ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef IPC_CONFIG_H
-#define IPC_CONFIG_H 1
+#define IPC_CONFIG_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +27,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "plf_config.h"
-#include "features.h"
+#include "plf_features.h"
 
 #define IPC_BUFFER_EXT    ((uint16_t) 400U) /* size addded to RX buffer because of RX queue implementation (using
                                             * headers for messages)
@@ -31,7 +37,7 @@ extern "C" {
                                                               */
 
 /* IPC tuning parameters */
-#if (USE_SOCKETS_MODEM == 1)
+#if (USE_SOCKETS_TYPE == USE_SOCKETS_MODEM)
 /* SOCKET MODE (IP stack in the modem) */
 #define IPC_USE_STREAM_MODE (0U)
 #else

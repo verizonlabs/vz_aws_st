@@ -6,7 +6,13 @@
   ******************************************************************************
   * @attention
   *
-  * ST Confidential Information released to Verizon under NDA.
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under Ultimate Liberty license
+  * SLA0044, the "License"; You may not use this file except in compliance with
+  * the License. You may obtain a copy of the License at:
+  *                      http://www.st.com/SLA0044
   *
   ******************************************************************************
   */
@@ -18,38 +24,37 @@
 
 /* NOTE : this code is designed for FreeRTOS */
 
+/* Private typedef -----------------------------------------------------------*/
+/* Private defines -----------------------------------------------------------*/
+/* Private macros ------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+/* Global variables ----------------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
+/* Functions Definition ------------------------------------------------------*/
 
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if (GPIO_Pin == GPIO_PIN_13)
-    {
-        BB_UserButton_Pressed();
-    }
+  if (huart->Instance == MODEM_UART_INSTANCE)
+  {
+    IPC_UART_RxCpltCallback(huart);
+  }
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if (UartHandle->Instance == MODEM_UART_INSTANCE)
-    {
-        IPC_UART_RxCpltCallback(UartHandle);
-    }
+  if (huart->Instance == MODEM_UART_INSTANCE)
+  {
+    IPC_UART_TxCpltCallback(huart);
+  }
 }
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
-    if (UartHandle->Instance == MODEM_UART_INSTANCE)
-    {
-        IPC_UART_TxCpltCallback(UartHandle);
-    }
-}
-
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
-{
-    if (UartHandle->Instance == MODEM_UART_INSTANCE)
-    {
-        IPC_UART_ErrorCallback(UartHandle);
-    }
+  if (huart->Instance == MODEM_UART_INSTANCE)
+  {
+    IPC_UART_ErrorCallback(huart);
+  }
 }
 
 
