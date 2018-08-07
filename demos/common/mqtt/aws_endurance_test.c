@@ -79,7 +79,8 @@
 /* Demo includes. */
 #include "aws_demo_config.h"
 #include "aws_endurance_test.h"
-#include "dc_data.h"
+#include "dc_cellular.h"
+#include "dc_mems.h"
 
 extern int prvSnprintf (char *str,size_t count,const char *fmt,...);
 
@@ -192,13 +193,13 @@ static MessageBufferHandle_t xEchoMessageBuffer = NULL;
  */
 static MQTTAgentHandle_t xMQTTHandle = NULL;
 
-static dc_cellular_rt_info_t     	dc_cellular_rt_info;
-static dc_pressure_rt_info_t        pressure_info;
-static dc_humidity_rt_info_t        humidity_info;
-static dc_temperature_rt_info_t     temperature_info;
-static dc_accelerometer_rt_info_t   accelerometer_info;
-static dc_gyroscope_rt_info_t       gyroscope_info;
-static dc_magnetometer_rt_info_t    magnetometer_info;
+static dc_cellular_info_t     	dc_cellular_info;
+static dc_pressure_info_t        pressure_info;
+static dc_humidity_info_t        humidity_info;
+static dc_temperature_info_t     temperature_info;
+static dc_accelerometer_info_t   accelerometer_info;
+static dc_gyroscope_info_t       gyroscope_info;
+static dc_magnetometer_info_t    magnetometer_info;
 
 /**
  * @brief The topic that the MQTT client both subscribes and publishes to.
@@ -340,7 +341,7 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
      * terminating null character to the cDataBuffer. */
     /*  Reading All data information from the buffer info */
 
-    dc_com_read (&dc_com_db, DC_COM_CELLULAR, (void*)&dc_cellular_rt_info,sizeof(dc_cellular_rt_info));
+    dc_com_read (&dc_com_db, DC_COM_CELLULAR, (void*)&dc_cellular_info,sizeof(dc_cellular_info));
     dc_com_read (&dc_com_db, DC_COM_PRESSURE, (void*)&pressure_info, sizeof(pressure_info)); /*  Reading Pressure info */
     dc_com_read (&dc_com_db, DC_COM_TEMPERATURE, (void*)&temperature_info, sizeof(temperature_info));
     dc_com_read (&dc_com_db, DC_COM_HUMIDITY, (void*)&humidity_info, sizeof(humidity_info));
@@ -367,7 +368,7 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
 					accelerometer_info.accelerometer.AXIS_X,
 					accelerometer_info.accelerometer.AXIS_Y,
 					accelerometer_info.accelerometer.AXIS_Z,
-					dc_cellular_rt_info.cs_signal_level_db);
+					dc_cellular_info.cs_signal_level_db);
 
     memset( &( xPublishParameters ), 0x00, sizeof( xPublishParameters ) );
     xPublishParameters.pucTopic = (uint8_t *) prvTOPIC_NAME;

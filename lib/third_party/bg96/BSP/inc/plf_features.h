@@ -80,7 +80,7 @@ extern "C" {
 /* BEGIN -  Miscellaneous functionalities  */
 /* ======================================= */
 /* To configure some parameters of the software */
-#define USE_DEFAULT_SETUP     (0) /* 0: Use setup menu,
+#define USE_DEFAULT_SETUP     (1) /* 0: Use setup menu,
                                      1: Use default parameters, no setup menu */
 
 /* ======================================= */

@@ -1,32 +1,39 @@
 /**
   ******************************************************************************
-  * @file    Application\net\com\inc\com_sockets_net_compat.h
+  * @file    com_sockets_net_compat.h
   * @author  MCD Application Team
-  * @brief   This file defines Communication Socket Net Compatibility Interface
+  * @brief   Com sockets net definition for compatibility LwIP / Modem
   ******************************************************************************
   * @attention
   *
-  * ST Confidential Information released to Verizon under NDA.
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under Ultimate Liberty license
+  * SLA0044, the "License"; You may not use this file except in compliance with
+  * the License. You may obtain a copy of the License at:
+  *                      http://www.st.com/SLA0044
   *
   ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __COM_SOCKETS_NET_COMPAT_H__
-#define __COM_SOCKETS_NET_COMPAT_H__ 1
+#ifndef COM_SOCKETS_NET_COMPAT_H
+#define COM_SOCKETS_NET_COMPAT_H
 
-#ifdef __cplusplus 
-extern "C" { 
-#endif 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "plf_config.h"
 
+#if (USE_SOCKETS_TYPE == USE_SOCKETS_MODEM)
+
 /* Exported constants --------------------------------------------------------*/
-#if (USE_SOCKETS_MODEM == 1)
 #define COM_INADDR_ANY          ((uint32_t)0x00000000UL) /* All IP adresses accepted */
 
-/* Socket Familly */
+/* Socket Family */
 #define COM_AF_UNSPEC       0 /* Unspecified */
 #define COM_AF_INET         1 /* Internet Address Family */
 #define COM_AF_INET6        3 /* Internet Address Family version 6 */
@@ -38,11 +45,11 @@ extern "C" {
 
 /* Socket Protocol */
 #define COM_IPPROTO_IP      0  /* IPv4 Level   */
-#define COM_IPPROTO_ICMP    1  
+#define COM_IPPROTO_ICMP    1
 #define COM_IPPROTO_UDP     2  /* UDP Protocol */
 #define COM_IPPROTO_IPV6    3  /* IPv6 Level   */
 #define COM_IPPROTO_TCP     6  /* TCP Protocol */
-  
+
 /*
  * Socket Options
  */
@@ -58,17 +65,22 @@ extern "C" {
 /* Flags used with recv. */
 #define COM_MSG_WAIT       0x00    /* Blocking    */
 #define COM_MSG_DONTWAIT   0x01    /* Nonblocking */
-  
+
 /* Exported types ------------------------------------------------------------*/
+/* External variables --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
-#else
+#else /* USE_SOCKETS_TYPE != USE_SOCKETS_MODEM */
+
+/* Includes ------------------------------------------------------------------*/
+/* only when USE_SOCKETS_TYPE == USE_SOCKETS_LWIP */
 #include "lwip/sockets.h"
-  
+
+/* Exported constants --------------------------------------------------------*/
 #define COM_INADDR_ANY      INADDR_ANY
 
-/* Socket Familly */
+/* Socket Family */
 #define COM_AF_UNSPEC       AF_UNSPEC /* Unspecified */
 #define COM_AF_INET         AF_INET   /* Internet Address Family */
 #define COM_AF_INET6        AF_INET6  /* Internet Address Family version 6 */
@@ -100,13 +112,19 @@ extern "C" {
 /* Flags used with recv. */
 #define COM_MSG_WAIT       MSG_WAIT      /* Blocking    */
 #define COM_MSG_DONTWAIT   MSG_DONTWAIT  /* Nonblocking */
-#endif
-  
-#ifdef __cplusplus 
-} 
-#endif 
 
-#endif /* __COM_SOCKETS_NET_COMPAT_H__ */
+/* Exported types ------------------------------------------------------------*/
+/* External variables --------------------------------------------------------*/
+/* Exported macros -----------------------------------------------------------*/
+/* Exported functions ------------------------------------------------------- */
+
+#endif /* USE_SOCKETS_TYPE == USE_SOCKETS_MODEM */
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* COM_SOCKETS_NET_COMPAT_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-
