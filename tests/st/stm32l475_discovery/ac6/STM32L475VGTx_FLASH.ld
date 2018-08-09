@@ -144,11 +144,19 @@ SECTIONS
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
-    *(.freertos_heap2)
     . = ALIGN(8);
     _edata = .;        /* define a global symbol at data end */
-  } >RAM2 AT> FLASH
+  } >RAM AT> FLASH
 
+  _sidata2 = LOADADDR(.data2);
+  .data2 : 
+  {
+    . = ALIGN(8);
+    _sdata2 = .;        /* create a global symbol at data start */
+    *(.freertos_heap2)
+    . = ALIGN(8);
+    _edata2 = .;        /* define a global symbol at data end */
+  } >RAM2 AT> FLASH
   
   /* Uninitialized data section */
   . = ALIGN(4);
