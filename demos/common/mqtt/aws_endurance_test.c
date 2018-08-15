@@ -1,6 +1,7 @@
 /*
  * Amazon FreeRTOS MQTT Endurance Test V1.2.3
- * Copyright (C) 2018 pureIntegration. All Rights Reserved
+
+ * Copyright (C) 2018, Verizon, Inc. All rights reserved.
  * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,7 +23,6 @@
  *
  * http://aws.amazon.com/freertos
  * http://www.FreeRTOS.org
- * https://pureintegration.com
  */
 
 
