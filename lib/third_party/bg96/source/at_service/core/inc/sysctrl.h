@@ -1,36 +1,37 @@
 /**
   ******************************************************************************
-  * @file    Application\at_service\core\inc\sysctrl.h
+  * @file    sysctrl.h
   * @author  MCD Application Team
-  * @brief   This file defines all the functions prototypes for generic System
-  *          Control
+  * @brief   Header for sysctrl.c module
   ******************************************************************************
   * @attention
   *
-  * ST Confidential Information released to Verizon under NDA.
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under Ultimate Liberty license
+  * SLA0044, the "License"; You may not use this file except in compliance with
+  * the License. You may obtain a copy of the License at:
+  *                      http://www.st.com/SLA0044
   *
   ******************************************************************************
   */
 
-#ifndef SYSCTRL_H_
-#define SYSCTRL_H_
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef SYSCTRL_H
+#define SYSCTRL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Includes ------------------------------------------------------------------*/
 #include "ipc_common.h"
-/*
->> Host to Modem:
-Modem_Enable : power on modem
-Modem_Reset :
-Modem_Service : select modem boot mode (from "Flash" or "Host over USB")
-App_Wake0 :
-App_Wake1 :
 
->> Modem to Host
-Boot_Ind : indicates end of modem boot
-Modem_Wake: modem data shall be read, request host to wake up
-*/
+/* Exported constants --------------------------------------------------------*/
+#define MAX_CONNECTED_DEVICES (2U) /* maximum number of hardwares devices (modem, wifi,...) connected */
 
-#define MAX_CONNECTED_DEVICES (2) /* maximum number of hardwares devices (modem, wifi,...) connected */
-
+/* Exported types ------------------------------------------------------------*/
 typedef uint16_t sysctrl_handle_t;
 
 typedef enum
@@ -41,43 +42,50 @@ typedef enum
 
 typedef enum
 {
-    DEVTYPE_MODEM_CELLULAR = 0,
- /*  DEVTYPE_WIFI, */
- /*  DEVTYPE_GPS, */
- /* etc... all modules using AT commands */
+  DEVTYPE_MODEM_CELLULAR = 0,
+  /*  DEVTYPE_WIFI, */
+  /*  DEVTYPE_GPS, */
+  /* etc... all modules using AT commands */
 
-    /* --- */
-    DEVTYPE_INVALID,      /* keep it last */
+  /* --- */
+  DEVTYPE_INVALID,      /* keep it last */
 } sysctrl_device_type_t;
 
 typedef struct
 {
-    sysctrl_device_type_t       type;
-    IPC_Device_t                ipc_device;
-    IPC_Interface_t             ipc_interface;
+  sysctrl_device_type_t       type;
+  IPC_Device_t                ipc_device;
+  IPC_Interface_t             ipc_interface;
 } sysctrl_info_t;
 
-/* functions prototypes  ----------------------------------------------------------*/
-typedef sysctrl_status_t (*SC_getDeviceDescriptor) (sysctrl_device_type_t device_type, sysctrl_info_t *p_devices_list);
-typedef sysctrl_status_t (*SC_power_on) (sysctrl_device_type_t device_type);
-typedef sysctrl_status_t (*SC_power_off) (sysctrl_device_type_t device_type);
-typedef sysctrl_status_t (*SC_power_reset_device) (sysctrl_device_type_t device_type);
+typedef sysctrl_status_t (*SC_getDeviceDescriptor)(sysctrl_device_type_t device_type, sysctrl_info_t *p_devices_list);
+typedef sysctrl_status_t (*SC_power_on)(sysctrl_device_type_t device_type);
+typedef sysctrl_status_t (*SC_power_off)(sysctrl_device_type_t device_type);
+typedef sysctrl_status_t (*SC_power_reset_device)(sysctrl_device_type_t device_type);
 
-/* structures prototypes  --------------------------------------------------*/
 typedef struct
 {
-    uint8_t                     initialized;
-    SC_getDeviceDescriptor      f_getDeviceDescriptor;
-    SC_power_on                 f_power_on;
-    SC_power_off                f_power_off;
-    SC_power_reset_device       f_reset_device;
+  uint8_t                     initialized;
+  SC_getDeviceDescriptor      f_getDeviceDescriptor;
+  SC_power_on                 f_power_on;
+  SC_power_off                f_power_off;
+  SC_power_reset_device       f_reset_device;
 } sysctrl_funcPtrs_t;
 
-/* API */
-sysctrl_status_t SysCtrl_getDeviceDescriptor (sysctrl_device_type_t device_type, sysctrl_info_t *p_devices_list);
-sysctrl_status_t SysCtrl_power_on (sysctrl_device_type_t device_type);
-sysctrl_status_t SysCtrl_power_off (sysctrl_device_type_t device_type);
-sysctrl_status_t SysCtrl_reset_device (sysctrl_device_type_t device_type);
+/* External variables --------------------------------------------------------*/
 
+/* Exported macros -----------------------------------------------------------*/
 
-#endif /* SYSCTRL_H_ */
+/* Exported functions ------------------------------------------------------- */
+sysctrl_status_t SysCtrl_getDeviceDescriptor(sysctrl_device_type_t device_type, sysctrl_info_t *p_devices_list);
+sysctrl_status_t SysCtrl_power_on(sysctrl_device_type_t device_type);
+sysctrl_status_t SysCtrl_power_off(sysctrl_device_type_t device_type);
+sysctrl_status_t SysCtrl_reset_device(sysctrl_device_type_t device_type);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* SYSCTRL_H */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

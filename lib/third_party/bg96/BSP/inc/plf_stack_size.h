@@ -1,42 +1,50 @@
 /**
   ******************************************************************************
-  * @file    project_config/inc/stack_size.h
+  * @file    stack_size.h
   * @author  MCD Application Team
-  * @brief   This file contains the software configuration of the platform
+  * @brief   This file contains the size of all the stacks
   ******************************************************************************
   * @attention
   *
-  * ST Confidential Information released to Verizon under NDA.
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under Ultimate Liberty license
+  * SLA0044, the "License"; You may not use this file except in compliance with
+  * the License. You may obtain a copy of the License at:
+  *                      http://www.st.com/SLA0044
   *
   ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __PLF_STACK_SIZE_H
-#define __PLF_STACK_SIZE_H
+#ifndef PLF_STACK_SIZE_H
+#define PLF_STACK_SIZE_H
 
-#include "features.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#define TCPIP_THREAD_STACK_SIZE             512
-#define PPPOSIF_CLIENT_THREAD_STACK_SIZE    640
-#define PPPOSIF_SERVER_THREAD_STACK_SIZE    768
-#define DC_CTRL_THREAD_STACK_SIZE           256
-#define DC_TEST_THREAD_STACK_SIZE           256
-#define DC_MEMS_THREAD_STACK_SIZE           256
-#define DEFAULT_THREAD_STACK_SIZE           192
-#define DC_EMUL_THREAD_STACK_SIZE           300
-#define ATCORE_THREAD_STACK_SIZE            256
-#define IAC_COAP_RECEIVE_THREAD_STACK_SIZE  512
-#define COAP_RESOURCES_THREAD_STACK_SIZE    384
-#define CELLULAR_SERVICE_THREAD_STACK_SIZE  512
-#define NIFMAN_THREAD_STACK_SIZE            256
-#define HRM_THREAD_STACK_SIZE               300
-#define HTTPCLIENT_THREAD_STACK_SIZE        384
-#define HTTPSERVER_THREAD_STACK_SIZE        512
-#define LIVEBOX_THREAD_STACK_SIZE           2048
-#define PINGCLIENT_THREAD_STACK_SIZE        256
-#define FREERTOS_TIMER_THREAD_STACK_SIZE    256
-#define FREERTOS_IDLE_THREAD_STACK_SIZE     128
+/* Includes ------------------------------------------------------------------*/
+
+#include "plf_features.h"
+
+/* Exported constants --------------------------------------------------------*/
+
+#define TCPIP_THREAD_STACK_SIZE             (512U)
+#define PPPOSIF_CLIENT_THREAD_STACK_SIZE    (640U)
+#define DC_CTRL_THREAD_STACK_SIZE           (256U)
+#define DC_TEST_THREAD_STACK_SIZE           (256U)
+#define DC_MEMS_THREAD_STACK_SIZE           (256U)
+#define DEFAULT_THREAD_STACK_SIZE           (300U)
+#define DC_EMUL_THREAD_STACK_SIZE           (300U)
+#define ATCORE_THREAD_STACK_SIZE            (256U)
+#define CELLULAR_SERVICE_THREAD_STACK_SIZE  (512U)
+#define NIFMAN_THREAD_STACK_SIZE            (256U)
+#define HTTPCLIENT_THREAD_STACK_SIZE        (384U)
+#define PINGCLIENT_THREAD_STACK_SIZE        (300U)
+#define FREERTOS_TIMER_THREAD_STACK_SIZE    (256U)
+#define FREERTOS_IDLE_THREAD_STACK_SIZE     (128U)
 
 #define USED_DC_CTRL_THREAD_STACK_SIZE           DC_CTRL_THREAD_STACK_SIZE
 #define USED_ATCORE_THREAD_STACK_SIZE            ATCORE_THREAD_STACK_SIZE
@@ -50,40 +58,32 @@
 #define USED_ATCORE_THREAD            1
 #define USED_NIFMAN_THREAD            1
 #define USED_CELLULAR_SERVICE_THREAD  1
-#define USED_DEFAULT_THREAD_THREAD    1
+#define USED_DEFAULT_THREAD           1
 #define USED_FREERTOS_TIMER_THREAD    1
 #define USED_FREERTOS_IDLE_THREAD     1
 
 
-#if (USE_SOCKETS_MODEM == 0)
+#if (USE_SOCKETS_TYPE == USE_SOCKETS_LWIP)
 #define USED_TCPIP_THREAD_STACK_SIZE           TCPIP_THREAD_STACK_SIZE
 #define USED_TCPIP_THREAD                        1
 #else
-#define USED_TCPIP_THREAD_STACK_SIZE             0
+#define USED_TCPIP_THREAD_STACK_SIZE             0U
 #define USED_TCPIP_THREAD                        0
 #endif
 
-#if (USE_PPPOSIF_CLIENT == 1)
+#if (USE_SOCKETS_TYPE == USE_SOCKETS_LWIP)
 #define USED_PPPOSIF_CLIENT_THREAD_STACK_SIZE           PPPOSIF_CLIENT_THREAD_STACK_SIZE
 #define USED_PPPOSIF_CLIENT_THREAD                        1
 #else
-#define USED_PPPOSIF_CLIENT_THREAD_STACK_SIZE             0
+#define USED_PPPOSIF_CLIENT_THREAD_STACK_SIZE             0U
 #define USED_PPPOSIF_CLIENT_THREAD                        0
-#endif
-
-#if (USE_PPPOSIF_SERVER == 1)
-#define USED_PPPOSIF_SERVER_THREAD_STACK_SIZE           PPPOSIF_SERVER_THREAD_STACK_SIZE
-#define USED_PPPOSIF_SERVER_THREAD                        1
-#else
-#define USED_PPPOSIF_SERVER_THREAD_STACK_SIZE             0
-#define USED_PPPOSIF_SERVER_THREAD                        0
 #endif
 
 #if (USE_DC_TEST == 1)
 #define USED_DC_TEST_THREAD_STACK_SIZE           DC_TEST_THREAD_STACK_SIZE
 #define USED_DC_TEST_THREAD                        1
 #else
-#define USED_DC_TEST_THREAD_STACK_SIZE             0
+#define USED_DC_TEST_THREAD_STACK_SIZE             0U
 #define USED_DC_TEST_THREAD                        0
 #endif
 
@@ -91,7 +91,7 @@
 #define USED_DC_MEMS_THREAD_STACK_SIZE           DC_MEMS_THREAD_STACK_SIZE
 #define USED_DC_MEMS_THREAD                        1
 #else
-#define USED_DC_MEMS_THREAD_STACK_SIZE             0
+#define USED_DC_MEMS_THREAD_STACK_SIZE             0U
 #define USED_DC_MEMS_THREAD                        0
 #endif
 
@@ -99,30 +99,8 @@
 #define USED_DC_EMUL_THREAD_STACK_SIZE           DC_EMUL_THREAD_STACK_SIZE
 #define USED_DC_EMUL_THREAD                        1
 #else
-#define USED_DC_EMUL_THREAD_STACK_SIZE             0
+#define USED_DC_EMUL_THREAD_STACK_SIZE             0U
 #define USED_DC_EMUL_THREAD                        0
-#endif
-
-
-#if (USE_COAP == 1)
-#define USED_IAC_COAP_RECEIVE_THREAD_STACK_SIZE  IAC_COAP_RECEIVE_THREAD_STACK_SIZE
-#define USED_COAP_RESOURCES_THREAD_STACK_SIZE    COAP_RESOURCES_THREAD_STACK_SIZE
-#define USED_COAP_RESOURCES_THREAD                     1
-#define USED_IAC_COAP_RECEIVE_THREAD                   1
-#else
-#define USED_COAP_RESOURCES_THREAD_STACK_SIZE          0
-#define USED_IAC_COAP_RECEIVE_THREAD_STACK_SIZE        0
-#define USED_COAP_RESOURCES_THREAD                     0
-#define USED_IAC_COAP_RECEIVE_THREAD                   0
-#endif
-
-
-#if (USE_HRM == 1)
-#define USED_HRM_THREAD_STACK_SIZE               HRM_THREAD_STACK_SIZE
-#define USED_HRM_THREAD                          1
-#else
-#define USED_HRM_THREAD_STACK_SIZE               0
-#define USED_HRM_THREAD                          0
 #endif
 
 
@@ -130,33 +108,15 @@
 #define USED_HTTPCLIENT_THREAD_STACK_SIZE        HTTPCLIENT_THREAD_STACK_SIZE
 #define USED_HTTPCLIENT_THREAD                   1
 #else
-#define USED_HTTPCLIENT_THREAD_STACK_SIZE        0
+#define USED_HTTPCLIENT_THREAD_STACK_SIZE        0U
 #define USED_HTTPCLIENT_THREAD                   0
-#endif
-
-
-#if (USE_HTTP_SERVER == 1)
-#define USED_HTTPSERVER_THREAD_STACK_SIZE        HTTPSERVER_THREAD_STACK_SIZE
-#define USED_HTTPSERVER_THREAD                   1
-#else
-#define USED_HTTPSERVER_THREAD_STACK_SIZE        0
-#define USED_HTTPSERVER_THREAD                   0
-#endif
-
-
-#if (USE_LIVEOBJECTS == 1)
-#define USED_LIVEBOX_THREAD_STACK_SIZE           LIVEBOX_THREAD_STACK_SIZE
-#define USED_LIVEBOX_THREAD                      1
-#else
-#define USED_LIVEBOX_THREAD_STACK_SIZE           0
-#define USED_LIVEBOX_THREAD                      0
 #endif
 
 #if (USE_PING_CLIENT == 1)
 #define USED_PINGCLIENT_THREAD_STACK_SIZE           PINGCLIENT_THREAD_STACK_SIZE
 #define USED_PINGCLIENT_THREAD                      1
 #else
-#define USED_PINGCLIENT_THREAD_STACK_SIZE           0
+#define USED_PINGCLIENT_THREAD_STACK_SIZE           0U
 #define USED_PINGCLIENT_THREAD                      0
 #endif
 
@@ -164,49 +124,48 @@
               USED_TCPIP_THREAD_STACK_SIZE                 \
              +USED_DEFAULT_THREAD_STACK_SIZE               \
              +USED_PPPOSIF_CLIENT_THREAD_STACK_SIZE        \
-             +USED_PPPOSIF_SERVER_THREAD_STACK_SIZE        \
              +USED_DC_CTRL_THREAD_STACK_SIZE               \
              +USED_ATCORE_THREAD_STACK_SIZE                \
              +USED_NIFMAN_THREAD_STACK_SIZE                \
-             +USED_COAP_RESOURCES_THREAD_STACK_SIZE        \
-             +USED_IAC_COAP_RECEIVE_THREAD_STACK_SIZE      \
              +USED_DC_TEST_THREAD_STACK_SIZE               \
              +USED_DC_MEMS_THREAD_STACK_SIZE               \
              +USED_DC_EMUL_THREAD_STACK_SIZE               \
-             +USED_HRM_THREAD_STACK_SIZE                   \
              +USED_HTTPCLIENT_THREAD_STACK_SIZE            \
-             +USED_HTTPSERVER_THREAD_STACK_SIZE            \
-             +USED_LIVEBOX_THREAD_STACK_SIZE               \
              +USED_PINGCLIENT_THREAD_STACK_SIZE            \
              +USED_FREERTOS_TIMER_THREAD_STACK_SIZE        \
              +USED_FREERTOS_IDLE_THREAD_STACK_SIZE         \
              +USED_CELLULAR_SERVICE_THREAD_STACK_SIZE
-               
-               
+
+
 #define THREAD_NUMBER                            \
                USED_TCPIP_THREAD                 \
               +USED_DEFAULT_THREAD               \
               +USED_PPPOSIF_CLIENT_THREAD        \
-              +USED_PPPOSIF_SERVER_THREAD        \
               +USED_DC_CTRL_THREAD               \
               +USED_ATCORE_THREAD                \
               +USED_NIFMAN_THREAD                \
-              +USED_COAP_RESOURCES_THREAD        \
-              +USED_IAC_COAP_RECEIVE_THREAD      \
               +USED_DC_TEST_THREAD               \
+              +USED_DC_MEMS_THREAD               \
               +USED_DC_EMUL_THREAD               \
-              +USED_HRM_THREAD                   \
               +USED_HTTPCLIENT_THREAD            \
-              +USED_HTTPSERVER_THREAD            \
-              +USED_LIVEBOX_THREAD               \
               +USED_PINGCLIENT_THREAD            \
               +USED_FREERTOS_TIMER_THREAD        \
               +USED_FREERTOS_IDLE_THREAD         \
               +USED_CELLULAR_SERVICE_THREAD
 
-#define PARTIAL_HEAP_SIZE                        8196
-#define TOTAL_HEAP_SIZE                         ((size_t)(TOTAL_THREAD_STACK_SIZE)*4+PARTIAL_HEAP_SIZE)
+#define PARTIAL_HEAP_SIZE       (8196U)
+#define TOTAL_HEAP_SIZE         ((TOTAL_THREAD_STACK_SIZE)*4U+(uint16_t)PARTIAL_HEAP_SIZE)
 
-#endif /* __PLF_STACK_SIZE_H */
+/* Exported types ------------------------------------------------------------*/
+/* External variables --------------------------------------------------------*/
+/* Exported macros -----------------------------------------------------------*/
+/* Exported functions ------------------------------------------------------- */
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* PLF_STACK_SIZE_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

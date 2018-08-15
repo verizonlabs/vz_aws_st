@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32l475e_iot01_qspi.c
   * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    17-March-2017
+  * @version V1.1.0
+  * @date    21-April-2017
   * @brief   This file includes a standard driver for the MX25R6435F QSPI 
   *          memory mounted on STM32L475E IOT01 board.
   @verbatim
