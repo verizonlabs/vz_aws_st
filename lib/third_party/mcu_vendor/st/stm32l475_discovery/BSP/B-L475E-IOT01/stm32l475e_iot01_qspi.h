@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32l475e_iot01_qspi.h
   * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    17-March-2017
+  * @version V1.1.0
+  * @date    21-April-2017
   * @brief   This file contains the common defines and functions prototypes for
   *          the stm32l475e_iot01_qspi.c driver.
   ******************************************************************************

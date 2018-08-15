@@ -143,6 +143,9 @@ void vApplicationDaemonTaskStartupHook( void )
     	/* Starts the BG96 modem tasks before running the demos */
         BG96_Modem_Start();
 
+    	/* Initialization of mems */
+        dc_mems_init();
+
         /* Start the mems data cache */
         dc_mems_start();
 

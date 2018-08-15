@@ -1,48 +1,43 @@
 /**
   ******************************************************************************
-  * @file    Application\core\ipc\src\ipc_common.c
+  * @file    ipc_common.c
   * @author  MCD Application Team
   * @brief   This file provides common code for IPC
   ******************************************************************************
   * @attention
   *
-  * ST Confidential Information released to Verizon under NDA.
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under Ultimate Liberty license
+  * SLA0044, the "License"; You may not use this file except in compliance with
+  * the License. You may obtain a copy of the License at:
+  *                      http://www.st.com/SLA0044
   *
   ******************************************************************************
   */
 
 /* Includes ------------------------------------------------------------------*/
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-
-/* Includes ------------------------------------------------------------------*/
 #include "string.h"
 #include "ipc_common.h"
-#if (IPC_USE_UART == 1)
+#if (IPC_USE_UART == 1U)
 #include "ipc_uart.h"
 #endif
-/* NOT SUPPORTED YET
-#if (IPC_USE_SPI == 1)
-#include "ipc_spi.h"
-#endif
-#if (IPC_USE_I2C == 1)
-#include "ipc_i2c.h"
-#endif
-*/
 
-/* Private constants ----------------------------------------------*/
+/* Private typedef -----------------------------------------------------------*/
+
+/* Private defines -----------------------------------------------------------*/
+
+/* Private macros ------------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
+
+/* Global variables ----------------------------------------------------------*/
 IPC_ClientDescription_t g_IPC_Devices_List[IPC_MAX_DEVICES];
 
-/* Private functions prototypes ----------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
 
-
-/* Exported functions --------------------------------------------------------*/
+/* Functions Definition ------------------------------------------------------*/
 /**
 * @brief  The function initialize the global variables of the IPC.
 * @param  device IPC device identifier.
@@ -52,38 +47,34 @@ IPC_ClientDescription_t g_IPC_Devices_List[IPC_MAX_DEVICES];
 */
 IPC_Status_t IPC_init(IPC_Device_t device, IPC_Interface_t itf_type, void *h_itf)
 {
-    IPC_Status_t status;
+  IPC_Status_t status;
 
-    /* check that device value is valid */
-    if (device >= IPC_MAX_DEVICES)
-    {
-        /* IPC device id exceed maximum size defined */
-        return(IPC_ERROR);
-    }
+  /* check that device value is valid */
+  if (device >= IPC_MAX_DEVICES)
+  {
+    /* IPC device id exceed maximum size defined */
+    return (IPC_ERROR);
+  }
 
-    if (itf_type == IPC_INTERFACE_UART)
-    {
-#if (IPC_USE_UART == 1)
-        status = IPC_init_uart(device, (UART_HandleTypeDef*) h_itf);
+  if (itf_type == IPC_INTERFACE_UART)
+  {
+#if (IPC_USE_UART == 1U)
+    status = IPC_init_uart(device, (UART_HandleTypeDef *) h_itf);
 #else
-        status = IPC_ERROR;
+    status = IPC_ERROR;
 #endif
-    }
-    else if (itf_type == IPC_INTERFACE_SPI)
-    {
-#if (IPC_USE_SPI == 1)
-        status = IPC_init_spi(device, (SPI_HandleTypeDef*) h_itf);
-#else
-        status = IPC_ERROR;
-#endif
-    }
-    else
-    {
-        /* interface not supported yet */
-        status = IPC_ERROR;
-    }
+  }
+  else if (itf_type == IPC_INTERFACE_SPI)
+  {
+    status = IPC_ERROR;
+  }
+  else
+  {
+    /* interface not supported yet */
+    status = IPC_ERROR;
+  }
 
-    return(status);
+  return (status);
 }
 
 /**
@@ -93,11 +84,11 @@ IPC_Status_t IPC_init(IPC_Device_t device, IPC_Interface_t itf_type, void *h_itf
 */
 IPC_Status_t IPC_deinit(IPC_Device_t  device)
 {
-    IPC_Status_t status;
+  IPC_Status_t status;
 
-    status = IPC_deinit_uart(device);
+  status = IPC_deinit_uart(device);
 
-    return(status);
+  return (status);
 }
 
 /**
@@ -111,38 +102,34 @@ IPC_Status_t IPC_deinit(IPC_Device_t  device)
 * @retval status
 */
 IPC_Status_t IPC_open(IPC_Handle_t *hipc,
-                           IPC_Device_t  device,
-                           IPC_Mode_t    mode,
-                           IPC_RxCallbackTypeDef pRxClientCallback,
-                           IPC_TxCallbackTypeDef pTxClientCallback,
-                           IPC_CheckEndOfMsgCallbackTypeDef pCheckEndOfMsg)
+                      IPC_Device_t  device,
+                      IPC_Mode_t    mode,
+                      IPC_RxCallbackTypeDef pRxClientCallback,
+                      IPC_TxCallbackTypeDef pTxClientCallback,
+                      IPC_CheckEndOfMsgCallbackTypeDef pCheckEndOfMsg)
 {
-    IPC_Status_t status;
+  IPC_Status_t status;
 
-    /* check if the device has been correctly initialized */
-    if (g_IPC_Devices_List[device].state != IPC_STATE_INITIALIZED)
-    {
-        return(IPC_ERROR);
-    }
+  /* check if the device has been correctly initialized */
+  if (g_IPC_Devices_List[device].state != IPC_STATE_INITIALIZED)
+  {
+    return (IPC_ERROR);
+  }
 
-    if (g_IPC_Devices_List[device].phy_int.interface_type == IPC_INTERFACE_UART)
-    {
-#if (IPC_USE_UART == 1)
-      status = IPC_open_uart(hipc, device, mode, pRxClientCallback, pTxClientCallback, pCheckEndOfMsg);
+  if (g_IPC_Devices_List[device].phy_int.interface_type == IPC_INTERFACE_UART)
+  {
+#if (IPC_USE_UART == 1U)
+    status = IPC_open_uart(hipc, device, mode, pRxClientCallback, pTxClientCallback, pCheckEndOfMsg);
 #else
-      status = IPC_ERROR;
+    status = IPC_ERROR;
 #endif
-    }
-    else if (g_IPC_Devices_List[device].phy_int.interface_type == IPC_INTERFACE_SPI)
-    {
-#if (IPC_USE_SPI == 1)
-      status = IPC_open_spi(hipc, device, mode, pRxClientCallback, pTxClientCallback, pCheckEndOfMsg);
-#else
-      status = IPC_ERROR;
-#endif
-    }
+  }
+  else
+  {
+    status = IPC_ERROR;
+  }
 
-    return(status);
+  return (status);
 }
 
 /**
@@ -152,11 +139,11 @@ IPC_Status_t IPC_open(IPC_Handle_t *hipc,
 */
 IPC_Status_t IPC_close(IPC_Handle_t *hipc)
 {
-    IPC_Status_t status;
+  IPC_Status_t status;
 
-    status = IPC_close_uart(hipc);
+  status = IPC_close_uart(hipc);
 
-    return(status);
+  return (status);
 }
 
 /**
@@ -166,11 +153,11 @@ IPC_Status_t IPC_close(IPC_Handle_t *hipc)
 */
 IPC_Status_t IPC_reset(IPC_Handle_t *hipc)
 {
-    IPC_Status_t status;
+  IPC_Status_t status;
 
-    status = IPC_reset_uart(hipc);
+  status = IPC_reset_uart(hipc);
 
-    return(status);
+  return (status);
 }
 
 
@@ -181,11 +168,11 @@ IPC_Status_t IPC_reset(IPC_Handle_t *hipc)
 */
 IPC_Status_t IPC_select(IPC_Handle_t *hipc)
 {
-    IPC_Status_t status;
+  IPC_Status_t status;
 
-    status = IPC_select_uart(hipc);
+  status = IPC_select_uart(hipc);
 
-    return(status);
+  return (status);
 }
 
 /**
@@ -195,7 +182,7 @@ IPC_Status_t IPC_select(IPC_Handle_t *hipc)
 */
 IPC_Handle_t *IPC_get_other_channel(IPC_Handle_t *hipc)
 {
-    return(IPC_get_other_channel_uart(hipc));
+  return (IPC_get_other_channel_uart(hipc));
 }
 
 /**
@@ -205,13 +192,13 @@ IPC_Handle_t *IPC_get_other_channel(IPC_Handle_t *hipc)
 * @param  bufsize Length of the data buffer.
 * @retval status
 */
-IPC_Status_t IPC_send(IPC_Handle_t *hipc, uint8_t* p_TxBuffer, uint16_t bufsize)
+IPC_Status_t IPC_send(IPC_Handle_t *hipc, uint8_t *p_TxBuffer, uint16_t bufsize)
 {
-    IPC_Status_t status;
+  IPC_Status_t status;
 
-    status = IPC_send_uart(hipc, p_TxBuffer, bufsize);
+  status = IPC_send_uart(hipc, p_TxBuffer, bufsize);
 
-    return(status);
+  return (status);
 }
 
 /**
@@ -222,11 +209,11 @@ IPC_Status_t IPC_send(IPC_Handle_t *hipc, uint8_t* p_TxBuffer, uint16_t bufsize)
 */
 IPC_Status_t IPC_receive(IPC_Handle_t *hipc, IPC_RxMessage_t *p_msg)
 {
-    IPC_Status_t status;
+  IPC_Status_t status;
 
-    status = IPC_receive_uart(hipc, p_msg);
+  status = IPC_receive_uart(hipc, p_msg);
 
-    return(status);
+  return (status);
 }
 
 /**
@@ -238,13 +225,13 @@ IPC_Status_t IPC_receive(IPC_Handle_t *hipc, IPC_RxMessage_t *p_msg)
 */
 IPC_Status_t IPC_streamReceive(IPC_Handle_t *hipc,  uint8_t *p_buffer, int16_t *p_len)
 {
-#if (IPC_USE_STREAM_MODE == 1)
-      IPC_Status_t status;
+#if (IPC_USE_STREAM_MODE == 1U)
+  IPC_Status_t status;
 
-    status = IPC_streamReceive_uart(hipc, p_buffer, p_len);
-    return(status);
+  status = IPC_streamReceive_uart(hipc, p_buffer, p_len);
+  return (status);
 #else
-   return(IPC_ERROR);
+  return (IPC_ERROR);
 #endif  /* IPC_USE_STREAM_MODE */
 }
 
@@ -256,7 +243,7 @@ IPC_Status_t IPC_streamReceive(IPC_Handle_t *hipc,  uint8_t *p_buffer, int16_t *
 */
 void IPC_dump_RX_queue(IPC_Handle_t *hipc, uint8_t readable)
 {
-    IPC_dump_RX_queue_uart(hipc, readable);
+  IPC_dump_RX_queue_uart(hipc, readable);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

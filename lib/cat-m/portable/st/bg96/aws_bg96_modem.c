@@ -31,8 +31,8 @@
 #include "usart.h"
 #include "dc_common.h"
 #include "dc_control.h"
-#include "dc_main.h"
-#include "dc_service.h"
+#include "cellular_init.h"
+#include "dc_cellular.h"
 #include "ipc_uart.h"
 #include "com_sockets.h"
 #include "nifman.h"
@@ -89,9 +89,7 @@ void BG96_Modem_Init(void) {
 
 	  CST_cellular_service_init();
 
-	  dc_init();
-
-	  nifman_init();
+	  cellular_init();
 
 	  dc_com_register_gen_event_cb(&dc_com_db, BG96_net_up_cb, (void*) NULL);
 
@@ -116,17 +114,7 @@ void BG96_Modem_Init(void) {
 void BG96_Modem_Start ()
 {
 
-	/* Do not change order */
-
-	dc_start();
-
-	com_start();
-
-	nifman_start();
-
-	CST_cellular_service_start();
-
-	radio_mngt_radio_on();
+	cellular_start();
 
 }
 
@@ -141,13 +129,12 @@ void BG96_Modem_Start ()
 static void BG96_net_up_cb ( dc_com_event_id_t dc_event_id, void* private_gui_data )
 {
 
-  switch (dc_event_id)
-  {
-    case DC_COM_NIFMAN_INFO:
+
+    if( dc_event_id == DC_COM_NIFMAN_INFO)
     {
-      dc_nifman_rt_info_t  dc_nifman_rt_info;
-      dc_com_read( &dc_com_db, DC_COM_NIFMAN_INFO, (void *)&dc_nifman_rt_info, sizeof(dc_nifman_rt_info));
-      if(dc_nifman_rt_info.rt_state  ==  DC_SERVICE_ON)
+      dc_nifman_info_t  dc_nifman_info;
+      dc_com_read( &dc_com_db, DC_COM_NIFMAN_INFO, (void *)&dc_nifman_info, sizeof(dc_nifman_info));
+      if(dc_nifman_info.rt_state  ==  DC_SERVICE_ON)
       {
     	  osMessagePut(BG96_modem_queue, dc_event_id, 0);
     	  BG96_network_status = network_is_up;
@@ -157,11 +144,8 @@ static void BG96_net_up_cb ( dc_com_event_id_t dc_event_id, void* private_gui_da
       {
     	  configPRINTF(("Network is down\r\n"));
       }
-      break;
+
     }
 
-    default:
-      break;
-  }
 }
 
