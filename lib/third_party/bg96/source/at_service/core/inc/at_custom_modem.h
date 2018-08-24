@@ -31,7 +31,7 @@ extern "C" {
 #include "at_custom_common.h"
 #include "cellular_service.h"
 #include "cellular_service_int.h"
-#include "IPC_common.h"
+#include "ipc_common.h"
 
 /* Exported constants --------------------------------------------------------*/
 #define MODEM_DEFAULT_TIMEOUT      ((uint32_t) 10000U)
