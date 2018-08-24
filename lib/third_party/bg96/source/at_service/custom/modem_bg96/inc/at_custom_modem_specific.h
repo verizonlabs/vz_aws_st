@@ -32,7 +32,7 @@ extern "C" {
 #include "at_custom_modem.h"
 #include "cellular_service.h"
 #include "cellular_service_int.h"
-#include "IPC_common.h"
+#include "ipc_common.h"
 
 /* Exported constants --------------------------------------------------------*/
 /* device specific parameters */
