@@ -354,7 +354,7 @@ static void prvPublishNextMessage( BaseType_t xMessageNumber )
     				"\"Gyro_X\":\"%d\",\"Gyro_Y\":\"%d\",\"Gyro_Z\":\"%d\","
     				"\"Magn_X\":\"%d\",\"Magn_Y\":\"%d\",\"Magn_Z\":\"%d\","
     				"\"Accel_X\":\"%d\",\"Accel_Y\":\"%d\",\"Accel_Z\":\"%d\","
-    				"\"RSSi\":\"%d dB\"}",
+    				"\"RSSi\":\"%d\"}",
 					xMessageNumber,
 					pressure_info.pressure,
 					temperature_info.temperature,
